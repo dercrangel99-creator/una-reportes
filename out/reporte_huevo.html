@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNA · Huevo — Reporte Analítico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --azul:#03488D; --marino:#06254B; --hueso:#F2F8FF; --tinta:#1C1C1C;
+  --gris:#5a6478; --linea:#DCE6F5; --naranja:#b85c00; --dorado:#F8D227;
+  --rojo:#EF4444; --verde:#2e8b57; --cyan:#0EA5E9;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Poppins','Montserrat','Avenir Next','Segoe UI',system-ui,sans-serif;background:var(--hueso);color:var(--tinta);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+header{background:var(--marino);color:#fff;position:relative;overflow:hidden}
+header .wrap{display:flex;align-items:center;gap:28px;padding:32px 20px 28px;position:relative;z-index:1}
+.logo{flex:0 0 auto}
+.h-title h1{font-size:clamp(24px,3.4vw,38px);font-weight:800;text-transform:uppercase;letter-spacing:.5px;line-height:1.12}
+.h-title .sub{margin-top:8px;color:#A9C5E8;font-weight:500;font-size:14px;letter-spacing:.3px}
+.h-title .raya{width:56px;height:5px;background:var(--dorado);margin-top:14px;border-radius:2px}
+.dots{position:absolute;right:24px;bottom:18px;opacity:.5}
+
+nav{background:var(--azul);position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(6,37,75,.25)}
+nav .wrap{display:flex;gap:4px;overflow-x:auto;padding:0 20px}
+nav a{color:#fff;text-decoration:none;font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.8px;padding:13px 16px;white-space:nowrap;border-bottom:3px solid transparent}
+nav a:hover,nav a:focus-visible{border-bottom-color:var(--dorado);outline:none}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:26px 0}
+.kpi{background:#fff;border:1px solid var(--linea);border-top:5px solid var(--azul);border-radius:10px;padding:16px 18px}
+.kpi .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gris)}
+.kpi .val{font-size:30px;font-weight:800;color:var(--marino);margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.kpi .val small{font-size:15px;font-weight:600;color:var(--gris)}
+.kpi .delta{font-size:12.5px;font-weight:700}
+.kpi .delta.up{color:var(--verde)}.kpi .delta.dn{color:var(--rojo)}
+.kpi .note{font-size:11.5px;color:var(--gris);margin-top:3px}
+
+.banda{background:var(--azul);color:#fff;margin-top:40px;border-radius:10px;display:flex;align-items:center;gap:18px;padding:14px 22px;position:relative;overflow:hidden}
+.banda h2{font-size:clamp(17px,2.2vw,23px);font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.banda .num{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:20px;letter-spacing:1px;flex:0 0 auto}
+
+.grid{display:grid;gap:16px;margin-top:16px}
+.g2{grid-template-columns:1fr 1fr}
+@media(max-width:880px){.g2{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--linea);border-radius:12px;padding:18px 18px 14px;box-shadow:0 1px 3px rgba(6,37,75,.05)}
+.card h3{font-size:14.5px;font-weight:800;color:var(--marino);text-transform:uppercase;letter-spacing:.4px}
+.card .desc{font-size:12.5px;color:var(--gris);margin:4px 0 10px}
+.chart{position:relative;height:320px}
+.chart.tall{height:380px}
+.chart.short{height:280px}
+canvas{max-width:100%}
+.fuente{font-size:10.5px;color:#93A3BC;margin-top:8px;text-transform:uppercase;letter-spacing:.5px}
+
+details.como{margin-top:10px;border:1px solid var(--linea);border-radius:9px;background:#F7FBFF;font-size:13px}
+details.como summary{cursor:pointer;padding:9px 14px;font-weight:700;color:var(--azul);font-size:12.5px;list-style:none;display:flex;align-items:center;gap:8px}
+details.como summary::-webkit-details-marker{display:none}
+details.como summary::before{content:'?';display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--azul);color:#fff;font-size:11px;font-weight:800;flex:0 0 auto}
+details.como[open] summary{border-bottom:1px solid var(--linea)}
+details.como .cuerpo{padding:12px 16px 14px;color:var(--tinta)}
+details.como .cuerpo p{margin-bottom:8px}
+details.como .cuerpo p:last-child{margin-bottom:0}
+details.como strong{color:var(--marino)}
+
+.ctrl{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px;align-items:center}
+.ctrl .lblc{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--gris);margin-right:2px}
+.ctrl button{font:inherit;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:16px;border:1.5px solid var(--azul);background:#fff;color:var(--azul);cursor:pointer;font-variant-numeric:tabular-nums}
+.ctrl button.on{background:var(--azul);color:#fff}
+.ctrl button.all{border-color:var(--gris);color:var(--gris)}
+.ctrl button.all.on{background:var(--gris);color:#fff;border-color:var(--gris)}
+.ctrl button:focus-visible{outline:2px solid var(--dorado);outline-offset:2px}
+.hintc{font-size:11px;color:#93A3BC;margin:-4px 0 8px}
+
+.heat-wrap{overflow-x:auto}
+/* table-layout fijo: reparte las 12 columnas por igual para que todos los
+   mapas de calor queden con la misma proporcion, sin importar si una celda
+   dice "n/d" o "+27.7%". */
+.heat-table{width:100%;min-width:500px;table-layout:fixed;border-collapse:separate;border-spacing:2px;font-size:10.5px;font-variant-numeric:tabular-nums}
+.heat-table th{font-size:9.5px;font-weight:700;color:var(--gris);text-transform:uppercase;letter-spacing:.3px;padding:2px 0;text-align:center}
+.heat-table th.yr-col,.heat-table td.yr{width:44px}
+.heat-table td.yr{font-size:11.5px;font-weight:800;color:var(--marino);text-align:right;padding-right:8px;white-space:nowrap}
+.heat-cell{border-radius:5px;text-align:center;padding:9px 1px;font-weight:700;white-space:nowrap}
+.heat-cell.empty{background:#EEF4FC!important;color:#BFCDE0;font-weight:500;font-size:10px}
+
+.tabla-wrap{overflow-x:auto}
+table.datos{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+table.datos th{background:var(--marino);color:#fff;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;padding:9px 10px;text-align:left;position:sticky;top:0}
+table.datos td{padding:8px 10px;border-bottom:1px solid var(--linea)}
+table.datos tbody tr:nth-child(even){background:#F7FBFF}
+table.datos td.n{text-align:right}
+
+.lectura{background:#fff;border:1px solid var(--linea);border-left:6px solid var(--dorado);border-radius:10px;padding:16px 20px;margin-top:16px;font-size:14px}
+.lectura strong{color:var(--marino)}
+.lectura ul{margin:8px 0 0 18px}
+.lectura li{margin-bottom:6px}
+.metodo{background:var(--marino);color:#D7E4F4;border-radius:12px;padding:20px 24px;margin-top:16px;font-size:13.5px}
+.metodo h3{color:#fff;font-size:14px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.metodo p{margin-bottom:8px}
+.badge-r{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);padding:2px 10px;border-radius:14px;font-weight:700}
+.cofece{background:#fff;border:1px solid var(--linea);border-radius:12px;margin:34px 0 10px;padding:18px 22px;font-size:12px;color:var(--gris)}
+.cofece h4{color:var(--marino);font-size:12.5px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+footer{background:var(--marino);color:#A9C5E8;margin-top:26px;padding:20px 0;font-size:12px}
+footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
+.aviso{background:#FFF8E1;border:1px solid var(--dorado);border-radius:10px;padding:12px 18px;margin-top:16px;font-size:13px;color:var(--tinta)}
+@media print{nav{position:static}.chart{height:300px!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="logo"><svg width="78" height="92" viewBox="0 0 78 92" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="UNA">
+<ellipse cx="39" cy="34" rx="22" ry="27" stroke="#fff" stroke-width="2.6" fill="none"/>
+<path d="M39 14c-6 5-9 12-9 20 0 7 4 13 9 17 5-4 9-10 9-17 0-8-3-15-9-20z" stroke="#fff" stroke-width="2.2" fill="none"/>
+<circle cx="39" cy="24" r="2.6" fill="#F8D227"/>
+<text x="39" y="82" text-anchor="middle" font-family="Poppins,Segoe UI,sans-serif" font-size="25" font-weight="800" fill="#fff">UNA</text>
+</svg></div>
+    <div class="h-title">
+      <h1>Huevo: precio al productor,<br>parvada y comercio exterior</h1>
+      <div class="sub">Unión Nacional de Avicultores · Datos a jul de 2026</div>
+      <div class="raya"></div>
+    </div>
+    <svg class="dots" width="190" height="78" viewBox="0 0 190 78" xmlns="http://www.w3.org/2000/svg">
+<circle cx="6" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="6" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="6" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="6" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="6" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="6" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="76" r="2.3" fill="#fff" opacity="0.45"/></svg>
+  </div>
+</header>
+<nav><div class="wrap"><a href="#resumen">Resumen</a><a href="#precio">Precio al productor</a><a href="#pollita">Venta de pollita</a><a href="#parvada">Parvada y producción</a><a href="#comercio">Comercio exterior</a><a href="#correlacion">Correlación</a><a href="#consumidor">Precio al consumidor</a><a href="#sanidad">Sanidad</a><a href="#nota">Nota metodológica</a></div></nav>
+<div class="wrap">
+<section id="resumen">
+  <div class="kpis"><div class="kpi">
+      <div class="lbl">Precio al productor · Jul 2026</div>
+      <div class="val">$20.18 <small>/kg</small></div>
+      <div class="delta dn">▼ 49.1% vs. mismo mes año anterior</div>
+      <div class="note">Huevo blanco pagado al productor · fuente UNA</div>
+    </div><div class="kpi">
+      <div class="lbl">Aves de postura · 2026</div>
+      <div class="val">190.25 M <small>aves</small></div>
+      <div class="delta up">▲ 2.8% vs. año anterior</div>
+      <div class="note">Parvada nacional de postura</div>
+    </div><div class="kpi">
+      <div class="lbl">Venta de pollita · últimos 6 meses</div>
+      <div class="val">56.20 M <small>aves</small></div>
+      <div class="delta dn">▼ 10.9% vs. 6 meses previos</div>
+      <div class="note">Indicador adelantado de la parvada futura</div>
+    </div><div class="kpi">
+      <div class="lbl">Importación de huevo · Ago 2026</div>
+      <div class="val">4,810 <small>t</small></div>
+      <div class="delta up">▲ 56.3% vs. mismo mes año anterior</div>
+      <div class="note">Solo productos de huevo de gallina</div>
+    </div></div>
+  <div class="lectura"><strong>Lectura ejecutiva.</strong> El precio del huevo blanco pagado al productor cerró en <strong>$20.18/kg</strong> (Jul 2026), una baja de <strong>49.1%</strong> frente al mismo mes del año anterior. La parvada de postura se ubica en <strong>190.25 M aves</strong> (2026) y la venta de pollita de los últimos seis meses suma <strong>56.20 M aves</strong>, una baja de <strong>10.9%</strong> respecto al semestre previo. Por el rezago biológico de la crianza, ese movimiento en la compra de pollita se refleja en la parvada y en el precio varios meses después — la sección de correlación cuantifica ese desfase con los datos actuales.</div>
+</section>
+<section id="precio">
+  <div class="banda"><h2>Precio de huevo pagado al productor</h2><span class="num">Sección 01</span></div>
+  
+  <div class="card">
+      <h3>Serie mensual · pesos por kilogramo</h3>
+      <div class="desc">Precio al productor y su promedio móvil de 12 meses, que suaviza la estacionalidad y muestra la tendencia de fondo.</div>
+      <div class="chart tall"><canvas id="chPrecio"></canvas></div>
+      <div class="fuente">UNA · v_huevo_productor</div>
+    </div>
+<div class="grid g2"><div class="card">
+      <h3>Variación interanual (%)</h3>
+      <div class="desc">Cambio contra el mismo mes del año anterior.</div>
+      <div class="chart "><canvas id="chPrecioYoy"></canvas></div>
+      <div class="fuente">UNA · cálculo propio</div>
+    </div><div class="card">
+      <h3>Mapa de calor · variación mensual</h3>
+      <div class="desc">Cada celda es el cambio porcentual (%) contra el mes anterior.</div>
+      <div class="heat-wrap"><table class="heat-table">
+    <thead><tr><th class="yr-col"></th><th>Ene</th><th>Feb</th><th>Mar</th><th>Abr</th><th>May</th><th>Jun</th><th>Jul</th><th>Ago</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dic</th></tr></thead>
+    <tbody><tr><td class="yr">2019</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-2.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.56);color:#fff">+15.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.41);color:#1C1C1C">-10.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.12);color:#1C1C1C">+0.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.28);color:#1C1C1C">-5.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.49);color:#1C1C1C">-13.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.53);color:#1C1C1C">+14.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.49);color:#1C1C1C">+13.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.15);color:#1C1C1C">-1.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.41);color:#1C1C1C">+10.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.31);color:#1C1C1C">+6.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.48);color:#1C1C1C">-12.9</td></tr><tr><td class="yr">2020</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+1.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.55);color:#fff">+15.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.31);color:#1C1C1C">+6.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.21);color:#1C1C1C">+3.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.72);color:#fff">-21.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.13);color:#1C1C1C">-0.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+1.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.41);color:#1C1C1C">-10.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.18);color:#1C1C1C">-2.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.55);color:#fff">+15.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.43);color:#1C1C1C">+11.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.23);color:#1C1C1C">+3.8</td></tr><tr><td class="yr">2021</td><td class="heat-cell" style="background:rgba(239,68,68,0.51);color:#1C1C1C">-13.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.48);color:#1C1C1C">+12.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.40);color:#1C1C1C">+10.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.33);color:#1C1C1C">-7.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.36);color:#1C1C1C">-8.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.38);color:#1C1C1C">-9.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.25);color:#1C1C1C">+4.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.34);color:#1C1C1C">-7.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.54);color:#fff">+15.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.21);color:#1C1C1C">+3.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.18);color:#1C1C1C">-2.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.15);color:#1C1C1C">-1.2</td></tr><tr><td class="yr">2022</td><td class="heat-cell" style="background:rgba(46,139,87,0.33);color:#1C1C1C">+7.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.32);color:#1C1C1C">+7.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.41);color:#1C1C1C">+10.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.27);color:#1C1C1C">-5.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.24);color:#1C1C1C">+4.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.26);color:#1C1C1C">+5.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.27);color:#1C1C1C">+5.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.25);color:#1C1C1C">-4.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.30);color:#1C1C1C">+6.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.12);color:#1C1C1C">+0.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.16);color:#1C1C1C">-1.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.28);color:#1C1C1C">-5.7</td></tr><tr><td class="yr">2023</td><td class="heat-cell" style="background:rgba(46,139,87,0.36);color:#1C1C1C">+8.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.38);color:#1C1C1C">+9.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.22);color:#1C1C1C">-3.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+3.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.72);color:#fff">-21.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.59);color:#fff">-16.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.17);color:#1C1C1C">-1.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.63);color:#fff">+18.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.16);color:#1C1C1C">-1.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.45);color:#1C1C1C">+11.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.27);color:#1C1C1C">+5.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.44);color:#1C1C1C">-11.5</td></tr><tr><td class="yr">2024</td><td class="heat-cell" style="background:rgba(239,68,68,0.33);color:#1C1C1C">-7.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.29);color:#1C1C1C">+6.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.39);color:#1C1C1C">-9.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.87);color:#fff">+26.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.41);color:#1C1C1C">-10.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+1.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.33);color:#1C1C1C">+7.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.43);color:#1C1C1C">+10.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.28);color:#1C1C1C">-5.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.25);color:#1C1C1C">+4.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.27);color:#1C1C1C">-5.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.27);color:#1C1C1C">-5.4</td></tr><tr><td class="yr">2025</td><td class="heat-cell" style="background:rgba(239,68,68,0.28);color:#1C1C1C">-5.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.68);color:#fff">+19.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.45);color:#1C1C1C">-11.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.37);color:#1C1C1C">-8.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.33);color:#1C1C1C">+7.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.21);color:#1C1C1C">-3.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.75);color:#fff">+22.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.58);color:#fff">-16.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+1.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.30);color:#1C1C1C">-6.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-2.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.72);color:#fff">-21.2</td></tr><tr><td class="yr">2026</td><td class="heat-cell" style="background:rgba(239,68,68,0.45);color:#1C1C1C">-11.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.29);color:#1C1C1C">+6.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+2.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.35);color:#1C1C1C">-8.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.72);color:#fff">-21.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.40);color:#1C1C1C">+9.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.39);color:#1C1C1C">+9.6</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td></tr></tbody></table></div>
+      <div class="fuente">UNA · cálculo propio</div>
+    </div></div>
+  
+  
+</section>
+<section id="pollita">
+  <div class="banda"><h2>Venta de pollita</h2><span class="num">Sección 02</span></div>
+  
+  <div class="grid g2"><div class="card">
+      <h3>Suma móvil de 12 meses</h3>
+      <div class="desc">Aves acumuladas en los 12 meses previos a cada punto; evita las distorsiones del corte de calendario.</div>
+      <div class="chart "><canvas id="chPollitaSM"></canvas></div>
+      <div class="fuente">UNA · tabla pollitas</div>
+    </div><div class="card">
+      <h3>Comparativo por año</h3>
+      <div class="desc">Venta mensual de pollita de los últimos años, para comparar el ciclo estacional.</div>
+      <div class="chart "><canvas id="chPollitaAnual"></canvas></div>
+      <div class="fuente">UNA · tabla pollitas</div>
+    </div></div>
+  
+  
+</section>
+<section id="parvada">
+  <div class="banda"><h2>Parvada y producción</h2><span class="num">Sección 03</span></div>
+  
+  <div class="grid g2"><div class="card">
+      <h3>Aves de postura</h3>
+      <div class="desc">Inventario anual de la parvada nacional de postura.</div>
+      <div class="chart "><canvas id="chAves"></canvas></div>
+      <div class="fuente">UNA · tabla Production</div>
+    </div><div class="card">
+      <h3>Producción y consumo per cápita</h3>
+      <div class="desc">Producción anual de huevo (barras) contra el consumo per cápita (línea).</div>
+      <div class="chart "><canvas id="chProduccion"></canvas></div>
+      <div class="fuente">UNA · tabla Production</div>
+    </div></div>
+  
+  
+</section>
+<section id="comercio">
+  <div class="banda"><h2>Comercio exterior</h2><span class="num">Sección 04</span></div>
+  
+  <div class="card">
+      <h3>Principales países de origen</h3>
+      <div class="desc">Volumen importado por país proveedor. Elige el año con los botones de arriba para comparar cómo cambia la composición del abasto.</div>
+      <div class="ctrl" id="ctrlPaisHuevo"><span class="lblc">Año</span></div>
+      <div class="chart "><canvas id="chPaisHuevo"></canvas></div>
+      <div class="fuente">Pedimentos de importación · país de origen</div>
+    </div>
+<div class="card">
+      <h3>Huevo fértil importado, en cajas, por origen</h3>
+      <div class="desc">Volumen mensual expresado en cajas de 360 huevos. Los pedimentos se registran en kilogramos, así que la conversión toma un peso de 60 gramos por huevo incubable: cada caja equivale a 21.6 kilogramos.</div>
+      <div class="chart tall"><canvas id="chFertilCajas"></canvas></div>
+      <div class="fuente">Pedimentos · producto y país de origen</div>
+    </div>
+<div class="card">
+      <h3>Precio mensual del huevo fértil por origen</h3>
+      <div class="desc">Precio implícito por kilogramo pagado a cada proveedor. Estados Unidos y Brasil concentran prácticamente todo el volumen; los orígenes marginales mueven embarques muy pequeños, en los que el precio implícito puede dispararse en un mes aislado sin que eso refleje el costo de abasto.</div>
+      <div class="chart "><canvas id="chFertilPrecio"></canvas></div>
+      <div class="fuente">Pedimentos · valor entre volumen</div>
+    </div>
+<div class="card">
+      <h3>Huevo para plato: volumen y precio mensual</h3>
+      <div class="desc">Volumen importado mes a mes (barras) y precio implícito por kilogramo (línea).</div>
+      <div class="chart tall"><canvas id="chPlato"></canvas></div>
+      <div class="fuente">Pedimentos · producto</div>
+    </div>
+<div class="card">
+      <h3>Otras presentaciones importadas</h3>
+      <div class="desc">Volumen mensual del resto de las presentaciones de huevo (ovoproductos). Elige la presentación con los botones de arriba.</div>
+      <div class="ctrl" id="ctrlOtros"><span class="lblc">Presentación</span></div>
+      <div class="chart "><canvas id="chOtros"></canvas></div>
+      <div class="fuente">Pedimentos · producto</div>
+    </div>
+<div class="card">
+      <h3>Exportación de huevo por producto</h3>
+      <div class="desc">Volumen mensual exportado. Elige el producto con los botones de arriba.</div>
+      <div class="ctrl" id="ctrlExpoHuevo"><span class="lblc">Producto</span></div>
+      <div class="chart "><canvas id="chExpoHuevo"></canvas></div>
+      <div class="fuente">Pedimentos · categoría Huevo, flujo de exportación</div>
+    </div>
+  
+  <div class="aviso"><strong>Alcance y unidades.</strong> Esta sección considera únicamente huevo de gallina: quedan fuera el huevo fértil de pavo y algunas partidas de carne que aparecen clasificadas bajo la misma categoría en los pedimentos. No se grafica el total de la categoría porque mezcla presentaciones que no son comparables entre sí.</div>
+</section>
+<section id="correlacion">
+  <div class="banda"><h2>Correlación: pollita y precio</h2><span class="num">Sección 05</span></div>
+  
+  <div class="card">
+      <h3>Venta de pollita vs. precio del huevo</h3>
+      <div class="desc">Las barras son el número de pollitas vendidas cada mes (eje izquierdo); la línea es el precio del huevo blanco pagado al productor, en pesos por kilogramo (eje derecho). La pollita de hoy es la gallina en producción de varios meses después.</div>
+      <div class="chart tall"><canvas id="chDual"></canvas></div>
+      <div class="fuente">UNA · cálculo propio</div>
+    </div>
+<div class="card">
+      <h3>Rezago pollita → precio</h3>
+      <div class="desc">Correlación entre la variación anual de la venta de pollita y la del precio del huevo, según los meses de desfase. Se usan variaciones y no niveles para eliminar la tendencia común de ambas series.</div>
+      <div class="chart "><canvas id="chRezago"></canvas></div>
+      <div class="fuente">UNA · cálculo propio</div>
+    </div>
+  <div class="lectura"><strong>Cómo leerlo.</strong> El desfase con mayor asociación entre la venta de pollita y el precio del huevo es de <strong>5 meses</strong> (coeficiente r = -0.22, sobre 122 observaciones). El signo negativo es consistente con el mecanismo de oferta: más pollita hoy se traduce en más huevo disponible meses después, y esa mayor oferta presiona el precio a la baja. La correlación mide asociación estadística, no causalidad.</div>
+  
+</section>
+<section id="consumidor">
+  <div class="banda"><h2>Precio al consumidor</h2><span class="num">Sección 06</span></div>
+  
+  <div class="card">
+      <h3>Huevo blanco vs. huevo rojo al consumidor</h3>
+      <div class="desc">Precio promedio anual pagado por el consumidor final, por tipo de huevo.</div>
+      <div class="chart tall"><canvas id="chConsumidor"></canvas></div>
+      <div class="fuente">Profeco · precios al consumidor</div>
+    </div>
+  
+  
+</section>
+<section id="sanidad">
+  <div class="banda"><h2>Sanidad: focos en el continente americano</h2><span class="num">Sección 07</span></div>
+  <div class="kpis"><div class="kpi">
+      <div class="lbl">Focos nuevos · últimos 30 días</div>
+      <div class="val">14 <small>focos</small></div>
+      
+      <div class="note">Foco más reciente: 2026-09-26</div>
+    </div><div class="kpi">
+      <div class="lbl">Países afectados · últimos 30 días</div>
+      <div class="val">6 <small>países</small></div>
+      
+      <div class="note">Continente americano</div>
+    </div><div class="kpi">
+      <div class="lbl">Focos abiertos</div>
+      <div class="val">136 <small>focos</small></div>
+      
+      <div class="note">Sin fecha de cierre notificada</div>
+    </div><div class="kpi">
+      <div class="lbl">Aves perdidas · últimos 30 días</div>
+      <div class="val">283.4 mil <small>aves</small></div>
+      
+      <div class="note">Muertas más sacrificadas</div>
+    </div></div>
+  <div class="card">
+      <h3>Focos notificados por mes y país</h3>
+      <div class="desc">Número de focos con fecha de inicio en cada mes, apilados por país. Un registro de la WOAH puede agrupar varios focos; aquí se cuentan los focos, no los registros.</div>
+      <div class="chart tall"><canvas id="chFocosMes"></canvas></div>
+      <div class="fuente">WOAH · WAHIS</div>
+    </div>
+<div class="grid g2"><div class="card">
+      <h3>Focos por tipo de unidad afectada</h3>
+      <div class="desc">Un foco en aves de producción puede cerrar mercados; uno de traspatio o de fauna silvestre indica presión del virus en el entorno, sin el mismo efecto comercial.</div>
+      <div class="chart short"><canvas id="chTipoUnidad"></canvas></div>
+      <div class="fuente">WOAH · WAHIS</div>
+    </div><div class="card">
+      <h3>Aves perdidas por tipo de unidad</h3>
+      <div class="desc">Muertas más sacrificadas, según el tipo de unidad donde ocurrió el foco.</div>
+      <div class="chart short"><canvas id="chAvesTipo"></canvas></div>
+      <div class="fuente">WOAH · WAHIS</div>
+    </div></div>
+<div class="card">
+      <h3>Focos más recientes · últimos 30 días</h3>
+      <div class="desc">Detalle de cada foco notificado en el continente durante el último mes.</div>
+      <div class="tabla-wrap"><table class="datos"><thead><tr><th>Inicio</th><th>País</th><th>Ubicación</th><th>Unidad</th><th>Especies</th><th>Susceptibles</th><th>Casos</th><th>Muertes</th></tr></thead><tbody><tr><td class="">2026-09-26</td><td class="">Chile</td><td class="">Tolten, Araucanía</td><td class="">Backyard</td><td class="">Birds</td><td class="n">25</td><td class="n">25</td><td class="n">0</td></tr><tr><td class="">2026-09-20</td><td class="">Canada</td><td class="">Rhineland, Manitoba</td><td class="">Farm</td><td class="">Birds</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-19</td><td class="">Canada</td><td class="">Cartier, Manitoba</td><td class="">Farm</td><td class="">Birds</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-18</td><td class="">Canada</td><td class="">Rockwood, Manitoba</td><td class="">Farm</td><td class="">Birds</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-14</td><td class="">Argentina</td><td class="">EZEIZA, BUENOS AIRES</td><td class="">Backyard</td><td class="">Birds</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-14</td><td class="">United States of America</td><td class="">Kandiyohi, Minnesota</td><td class="">Farm</td><td class="">Birds</td><td class="n">61,111</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-13</td><td class="">United States of America</td><td class="">Ravalli, Montana</td><td class="">Backyard</td><td class="">Birds</td><td class="n">122</td><td class="n">—</td><td class="n">89</td></tr><tr><td class="">2026-09-13</td><td class="">United States of America</td><td class="">Big Stone, Minnesota</td><td class="">Farm</td><td class="">Birds</td><td class="n">55,318</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-11</td><td class="">United States of America</td><td class="">Barron, Wisconsin</td><td class="">Farm</td><td class="">Birds</td><td class="n">79,088</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-09</td><td class="">Peru</td><td class="">Nuevo Chimbote, Ancash</td><td class="">Backyard</td><td class="">Birds</td><td class="n">13</td><td class="n">—</td><td class="n">9</td></tr><tr><td class="">2026-09-09</td><td class="">Suriname</td><td class="">Welgelegen, Paramaribo</td><td class="">Farm</td><td class="">Birds</td><td class="n">6,000</td><td class="n">5,500</td><td class="n">5,500</td></tr><tr><td class="">2026-09-09</td><td class="">Canada</td><td class="">De Salaberry, Manitoba</td><td class="">Farm</td><td class="">Birds</td><td class="n">19,400</td><td class="n">4,700</td><td class="n">4,700</td></tr><tr><td class="">2026-09-08</td><td class="">United States of America</td><td class="">Becker, Minnesota</td><td class="">Farm</td><td class="">Birds</td><td class="n">44,352</td><td class="n">—</td><td class="n">6</td></tr><tr><td class="">2026-09-08</td><td class="">United States of America</td><td class="">Otter Tail, Minnesota</td><td class="">Farm</td><td class="">Birds</td><td class="n">18,000</td><td class="n">—</td><td class="n">—</td></tr></tbody></table></div>
+      <div class="fuente">WOAH · WAHIS</div>
+    </div>
+  
+  <div class="aviso"><strong>Cómo leer esta sección.</strong> Cada foco se ubica por sus coordenadas: se incluyen los que caen entre las longitudes 170° O y 30° O. Las cifras de susceptibles, casos y muertes corresponden a cada foco, no al evento completo del país, y una celda vacía significa que la notificación todavía no reporta esa cantidad. En el continente, buena parte de los avisos registran la especie como la categoría genérica &quot;Birds&quot;, por lo que el tipo de unidad afectada resulta más informativo que el nombre de la especie.</div>
+</section>
+
+<div class="metodo" id="nota">
+  <h3>Nota metodológica y alcance</h3>
+  <p><span class="badge-r">Origen de los datos</span>&nbsp; Todas las cifras provienen de la base de datos institucional y se consultan en el momento de generar el reporte. Los indicadores derivados —promedios y sumas móviles, variación interanual, correlaciones y conversiones de unidad— se calculan en el servidor, de modo que cualquier sistema que consuma el mismo servicio obtiene exactamente estas cifras.</p>
+  <p><span class="badge-r">Ventanas móviles</span>&nbsp; Las ventanas de 12 meses se alinean al último dato disponible, no al año calendario, para que los cortes de calendario no se lean como tendencia.</p>
+  <p><span class="badge-r">Comercio exterior</span>&nbsp; Las cifras salen de los pedimentos aduanales. Se omite el precio implícito de los meses con volumen marginal, donde los costos fijos del embarque distorsionan el valor por kilogramo.</p>
+  <p><span class="badge-r">Revisiones</span>&nbsp; Las cifras más recientes pueden ser preliminares y ajustarse en cargas posteriores.</p>
+  <p><span class="badge-r">Generado</span>&nbsp; 8 de octubre de 2026 a las 9:36 a.m.</p>
+</div>
+<div class="cofece">
+  <h4>Declaracion antimonopolio</h4>
+  <p>Este documento tiene fines exclusivamente informativos y estadisticos. La informacion es historica y agregada; no constituye una recomendacion de precios ni un acuerdo entre competidores. Cada participante determina su conducta comercial de forma independiente.</p>
+</div>
+</div>
+<footer><div class="wrap">
+  <span>Union Nacional de Avicultores &middot; Reporte generado automaticamente</span>
+  <span>Datos en vivo desde la base de datos institucional</span>
+</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const DATOS = {"chPrecio":{"labels":["Ene 13","Feb 13","Mar 13","Abr 13","May 13","Jun 13","Jul 13","Ago 13","Sep 13","Oct 13","Nov 13","Dic 13","Ene 14","Feb 14","Mar 14","Abr 14","May 14","Jun 14","Jul 14","Ago 14","Sep 14","Oct 14","Nov 14","Dic 14","Ene 15","Feb 15","Mar 15","Abr 15","May 15","Jun 15","Jul 15","Ago 15","Sep 15","Oct 15","Nov 15","Dic 15","Ene 16","Feb 16","Mar 16","Abr 16","May 16","Jun 16","Jul 16","Ago 16","Sep 16","Oct 16","Nov 16","Dic 16","Ene 17","Feb 17","Mar 17","Abr 17","May 17","Jun 17","Jul 17","Ago 17","Sep 17","Oct 17","Nov 17","Dic 17","Ene 18","Feb 18","Mar 18","Abr 18","May 18","Jun 18","Jul 18","Ago 18","Sep 18","Oct 18","Nov 18","Dic 18","Ene 19","Feb 19","Mar 19","Abr 19","May 19","Jun 19","Jul 19","Ago 19","Sep 19","Oct 19","Nov 19","Dic 19","Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26"],"precio":[19.87,21.37,23.82,25.45,25.89,21.03,21.0487,22.86,20.47,21.89,22.32,21.47,20.9714,23.01,21.88,22.42,23.36,20.42,18.933,20.3,19.4933,20.7787,23.3211,25.7109,26.66,27.75,28.53,24.32,16.03,17.64,15.65,16.83,16.1,17.48,15.18,15.45,15.02,20.25,17.71,18.1,13.91,12.62,12.22,13.92,15.63,14.05,15.04,17.6018,15.54,17.1,15.16,15.38,18.48,15.3,17.01,19.28,19.5,20.16,21.44,24.571,25.88,27.43,25.8,21.85,15.86,14.17,15.48,16.83,17.66,19.23,21.05,21.78,21.2,24.51,22,22,20.73,18.04,20.68,23.38,23.11,25.46,27.19,23.68,24.05,27.75,29.67,30.67,24.18,24.07,24.49,21.99,21.5,24.75,27.5,28.55,24.64,27.8,30.58,28.34,25.96,23.58,24.63,22.68,26.08,26.92,26.38,26.06,28.03,30,33.14,31.36,32.66,34.32,36.11,34.45,36.65,36.68,36.19,34.12,37.06,40.54,39.15,40.53,31.83,26.56,26.12,30.81,30.37,33.97,35.73,31.62,29.28,31.08,28.09,35.57,31.95,32.44,34.82,38.63,36.5,38.16,36.1,34.16,32.25,38.63,34.14,31.12,33.42,32.35,39.64,33.19,33.54,31.39,30.66,24.17,21.34,22.62,23.16,21.3,16.75,18.41,20.18],"pm12":[null,null,null,null,null,null,null,null,null,null,null,22.290725,22.382508333333334,22.519175,22.357508333333328,22.10500833333333,21.894175,21.843341666666664,21.667033333333332,21.4537,21.372308333333336,21.279700000000002,21.363125,21.71653333333333,22.190583333333336,22.585583333333332,23.139750000000003,23.298083333333338,22.687250000000006,22.455583333333333,22.182,21.892833333333332,21.61005833333334,21.335166666666666,20.656741666666665,19.801666666666666,18.831666666666667,18.206666666666667,17.305,16.786666666666665,16.61,16.191666666666666,15.905833333333334,15.663333333333332,15.624166666666666,15.338333333333333,15.326666666666666,15.505983333333333,15.549316666666664,15.286816666666665,15.074316666666663,14.847649999999996,15.22848333333333,15.451816666666666,15.850983333333332,16.297649999999997,16.62015,17.129316666666664,17.66265,18.243416666666665,19.105083333333333,19.96591666666667,20.852583333333335,21.391750000000002,21.173416666666668,21.07925,20.95175,20.747583333333328,20.594249999999995,20.51675,20.48425,20.25166666666667,19.861666666666668,19.618333333333332,19.301666666666666,19.314166666666665,19.72,20.042499999999997,20.47583333333333,21.021666666666665,21.47583333333333,21.995,22.50666666666667,22.665000000000003,22.9025,23.172500000000003,23.81166666666667,24.534166666666668,24.82166666666667,25.32416666666667,25.64166666666667,25.52583333333334,25.39166666666667,25.3325,25.358333333333334,25.764166666666668,25.813333333333336,25.8175,25.89333333333333,25.699166666666667,25.847499999999997,25.80666666666666,25.81833333333333,25.875833333333333,26.257499999999997,26.438333333333333,26.345,26.1375,26.419999999999998,26.603333333333335,26.816666666666663,27.06833333333333,27.626666666666665,28.521666666666672,29.47833333333334,30.459166666666665,31.34,32.15333333333333,32.97083333333333,33.6425,34.394999999999996,35.27333333333333,35.774166666666666,36.538333333333334,36.46916666666667,35.8225,34.99,34.68666666666666,34.163333333333334,33.9375,33.89916666666667,33.69083333333334,33.0425,32.25416666666667,31.332499999999992,30.91916666666666,30.92916666666666,31.419166666666666,32.14416666666667,32.795833333333334,33.306666666666665,33.655833333333334,33.68666666666667,33.89833333333333,34.145833333333336,34.775,35.27916666666667,34.90833333333333,35.03083333333333,35.02333333333333,35.425000000000004,34.97166666666667,34.725,34.160833333333336,33.7075,32.87500000000001,31.965833333333336,30.63166666666667,29.716666666666672,28.898333333333337,27.50916666666667,26.3475,24.725833333333338]},"chPrecioYoy":{"labels":["Ene 13","Feb 13","Mar 13","Abr 13","May 13","Jun 13","Jul 13","Ago 13","Sep 13","Oct 13","Nov 13","Dic 13","Ene 14","Feb 14","Mar 14","Abr 14","May 14","Jun 14","Jul 14","Ago 14","Sep 14","Oct 14","Nov 14","Dic 14","Ene 15","Feb 15","Mar 15","Abr 15","May 15","Jun 15","Jul 15","Ago 15","Sep 15","Oct 15","Nov 15","Dic 15","Ene 16","Feb 16","Mar 16","Abr 16","May 16","Jun 16","Jul 16","Ago 16","Sep 16","Oct 16","Nov 16","Dic 16","Ene 17","Feb 17","Mar 17","Abr 17","May 17","Jun 17","Jul 17","Ago 17","Sep 17","Oct 17","Nov 17","Dic 17","Ene 18","Feb 18","Mar 18","Abr 18","May 18","Jun 18","Jul 18","Ago 18","Sep 18","Oct 18","Nov 18","Dic 18","Ene 19","Feb 19","Mar 19","Abr 19","May 19","Jun 19","Jul 19","Ago 19","Sep 19","Oct 19","Nov 19","Dic 19","Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26"],"yoy":[null,null,null,null,null,null,null,null,null,null,null,null,5.54302969300452,7.674309780065515,-8.14441645675903,-11.905697445972487,-9.772112784859024,-2.900618164526864,-10.051452108681298,-11.198600174978122,-4.771372740595982,-5.076747373229785,4.485215053763445,19.752678155565906,27.12551379497793,20.599739243807033,30.393053016453393,8.474576271186434,-31.378424657534236,-13.614103819784528,-17.34009401573971,-17.09359605911331,-17.4075195067023,-15.875391627002653,-34.908730720249046,-39.90875465269594,-43.6609152288072,-27.027027027027028,-37.92499123729407,-25.575657894736835,-13.225202744853407,-28.45804988662132,-21.91693290734824,-17.290552584670223,-2.9192546583850967,-19.622425629290614,-0.9222661396574479,13.927508090614896,3.462050599201062,-15.555555555555548,-14.398644833427445,-15.027624309392268,32.85406182602444,21.236133122028537,39.19803600654665,38.50574712643679,24.760076775431855,43.48754448398576,42.55319148936172,39.59367791930371,66.53796653796654,60.40935672514618,70.18469656992085,42.06762028608583,-14.177489177489184,-7.385620915032684,-8.994708994709,-12.707468879668063,-9.435897435897434,-4.613095238095237,-1.8190298507462712,-11.358919050913679,-18.083462132921174,-10.645278891724383,-14.728682170542637,0.6864988558352337,30.70617906683481,27.311220889202538,33.591731266149864,38.91859774212716,30.860702151755376,32.397295891835675,29.168646080760098,8.723599632690535,13.443396226415102,13.219094247246016,34.86363636363637,39.409090909090914,16.64254703328509,33.42572062084258,18.423597678916824,-5.945252352437984,-6.966681090437038,-2.788688138256091,1.1401250459727794,20.565878378378383,2.4532224532224527,0.18018018018018275,3.0670711156049766,-7.597000326051521,7.361455748552527,-2.0357291233901202,0.5716619028174789,3.137789904502052,21.30232558139534,8.767676767676774,-4.072727272727277,-8.721541155866907,13.758116883116886,7.913669064748198,8.371484630477443,10.656316160903316,25.808936825885958,45.547073791348616,46.60982541615916,51.89594356261025,40.52914110429448,36.255572065378885,37.18726307808946,30.928626247122022,32.21548341063147,35.13333333333333,18.13518406759203,29.241071428571434,-2.541334966319652,-22.610722610722615,-27.665466629742454,-10.566037735849068,-17.135061391541605,-7.3882224645583445,-1.2710693561757416,-7.327080890973027,-20.992984349703185,-23.334977799704,-28.25031928480204,-12.23784850727856,0.37700282752120956,22.13855421686747,33.30781010719755,25.381369685167165,20.184392492591368,12.33441271710332,1.035544360481401,8.032890575585059,10.143442622950815,24.292149292149308,21.53791384834461,-12.51054259207197,4.600938967136158,-0.2774352651047975,13.842619184376796,-14.082319440849092,-8.109589041095893,-17.741090146750516,-15.06925207756233,-29.244730679156895,-33.82945736434109,-41.4444732073518,-32.161687170474515,-31.555269922879177,-49.880311190903655,-43.091190108191654,-49.09182643794148]},"chPollitaSM":{"labels":["Ene 15","Feb 15","Mar 15","Abr 15","May 15","Jun 15","Jul 15","Ago 15","Sep 15","Oct 15","Nov 15","Dic 15","Ene 16","Feb 16","Mar 16","Abr 16","May 16","Jun 16","Jul 16","Ago 16","Sep 16","Oct 16","Nov 16","Dic 16","Ene 17","Feb 17","Mar 17","Abr 17","May 17","Jun 17","Jul 17","Ago 17","Sep 17","Oct 17","Nov 17","Dic 17","Ene 18","Feb 18","Mar 18","Abr 18","May 18","Jun 18","Jul 18","Ago 18","Sep 18","Oct 18","Nov 18","Dic 18","Ene 19","Feb 19","Mar 19","Abr 19","May 19","Jun 19","Jul 19","Ago 19","Sep 19","Oct 19","Nov 19","Dic 19","Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"sm12":[null,null,null,null,null,null,null,null,null,null,null,97198938,96564402,96714479,96528133,96774689,97490595,98310597,96371279,96420950,96898553,97002792,96725633,96012921,97553962,96932982,96400555,95885622,95379777,93717098,95058236,95224648,94517089,95057759,96677702,98141846,96500345,96893446,97468607,97555649,97543857,97537026,99388486,99099691,99118536,100181988,100284358,100801308,101546529,102123194,101508532,101377363,101589646,102213544,101545810,101609845,101616956,101156438,100978803,100782121,100479009,100731161,102522133,103725158,102731773,103032826,103188271,104110285,104668255,105732104,106403923,106874182,107562505,108654819,108803470,109638491,110446022,111157917,111364290,112232824,113054884,111896005,111982743,112055344,112493093,110643160,110034328,108297079,109047643,109366449,108850556,107745626,106990084,107715620,107023936,106182466,105413766,106052538,106683972,107074789,106841132,107259134,107897846,108877160,109714180,109650003,111897068,113188095,114812174,114739597,114119995,115750398,115583838,114737862,115482446,115090276,115824085,116615215,116068178,116640002,117069019,118049500,118143802,117950065,119809169,120407116,121168819,121717966,122083829,122939178,123368355,123791019,123713677,124205724,124671163,124015574,122216551,121872784,120594051,119270824]},"chPollitaAnual":{"labels":["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],"a2022":[9069920,7957446,9482155,8180573,9465966,9544462,8716509,8897908,8732663,9286255,8295719,8552890],"a2023":[8301220,8596218,10113589,8571390,9232309,9962464,9355221,9877222,9569683,9222078,10542784,9843917],"a2024":[9925299,8523641,9493987,10201793,9065749,9116488,10099805,9485052,10303492,10013208,9995747,10415741],"a2025":[10354316,9504122,9588289,10008056,10924853,9714435,10861508,10034199,10669355,10868557,10424924,10838405],"a2026":[10276974,9996169,10053728,9352467,9125830,9370668,9582775,8710972,null,null,null,null]},"chAves":{"labels":[1977,1978,1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],"valores":[46645179,49678920,51914820,62308345,63759496,67699712,73115683,80061654,78460420,76891212,76506756,75741688,76120396,76494406,78789238,79183184,80687665,85950000,85000000,85536383,91876136,97505505,102326001,109871103,113589884,115286996,116575512,124196390,130704095,132464112,129458905,131065007,136846358,142101023,145702478,137002043,148044245,152146146,153633544,158658764,156774839,161164829,163297929,167423175.9,172190264.9,169660333,171152717.5,174586635.5,185091499.9,190252233]},"chProduccion":{"labels":[1977,1978,1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],"produccion":[676168,690537,721616,866086,886257,941026,1016308,1112857,1090599,1068788,1063444,1052809,1111358,1116818,1150322,1187748,1211503,1461150,1453500,1469538,1589457,1686845,1829751,1944718,2010540,2040579,2063386,2198276.103,2276865.335,2307524.831,2278476.728,2306744.123,2383863.556,2475399.821,2538137.167,2386575.589,2509349.953,2571270,2637581,2765422,2718476,2802656,2852815,2923331.312,3008163.928,2963983,2990037.975,3050028.523,3233548.504,3323707],"percapita":[10.6,10.5,10.6,12.5,12.6,13.2,13.9,15,14.4,13.9,13.6,13.3,13.7,13.8,13.89882074,14.13918385,14.1390325,16.72178988,16.3483601,16.35730853,17.38421658,18.11408274,19.23311613,20.06654494,20.51944695,20.52748981,20.46560564,21.56511369,21.95001823,22.05936281,21.3764852,21.16409309,21.56685232,21.92540077,22.20908752,20.73397358,22.06890213,22.18351696,22.22881375,23.11720681,22.43750325,22.80639414,23.17509222,23.73313078,23.97080929,23.01279228,23.12405897,23.18145256,24.1875667,24.92]},"chPaisHuevo":{"opciones":["2026","2025","2024","2023","2022","2021"],"series":{"2021":{"labels":["Estados Unidos","Brasil","Espana","Argentina","Dinamarca","Canada"],"valores":[82986.09642079992,4135.693445,209.85708000000002,50.94,40.6,4.508]},"2022":{"labels":["Estados Unidos","Brasil","Espana","Paises Bajos","Hungria","Belgica","Argentina","Peru"],"valores":[38527.286915999975,7765.645945000003,3679.311,2463.00894,2305.719,733.656,63.3754,20.005599999999998]},"2023":{"labels":["Estados Unidos","Brasil","Paises Bajos","Espana","Hungria","Belgica","Argentina","Canada"],"valores":[49368.398661999985,13599.465100000001,1862.595,1857.495,438.216,249.249,76.1705,25.435]},"2024":{"labels":["Estados Unidos","Brasil","Paises Bajos","Espana","Hungria","Argentina","Belgica","Canada"],"valores":[32188.394696999996,9645.06962,1011.333,453.5985,55.396,41.613,27.048,11.431]},"2025":{"labels":["Estados Unidos","Brasil","Paises Bajos","Espana","Belgica","Argentina","Canada","Italia"],"valores":[28848.357084000003,10354.36302,359.247,347.03589,289.01259999999996,193.476,13.722,0.005]},"2026":{"labels":["Estados Unidos","Brasil","Argentina","Espana","Canada"],"valores":[32450.997257999996,3856.6794000000004,84.898,31.931,26.159]}}},"chFertilCajas":{"labels":["Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"Estados Unidos":[120186.95787036991,108158.36990740694,122351.1601851852,116499.26157407407,120135.13092592594,130560.83930555558,116017.64930555558,129816.94865740743,143962.06476851852,135219.71074074076,132400.72550925927,115958.99583333335,113125.52893518518,103198.16111111111,119789.32680555555,99529.70731481482,115275.52175925927,116139.39074074074,123023.5365740741,132151.57166666668,130467.06842592593,126295.5375,121743.64212962963,108628.29462962963,113386.4690277778,105723.6388425926,98473.43268518521,98172.47296296299,81247.45694444445,66938.41791666667,82418.75550925927,92796.0877314815,107300.34476851854,103999.92439814816,91956.81574074074,102679.13805555558,94575.32851851852,82403.95314814815,90791.17060185186,93761.0788425926,92804.55078703705,98276.06935185187,104898.67046296298,94292.95000000001,103214.71037037038,108949.77902777778,81831.48916666667,86477.34208333334,65578.11231481482,80385.35078703705,89189.41310185187,78600.94949074075,68168.36217592593,80740.28074074075,75675.46916666668,78181.05842592593],"Brasil":[17732.312037037038,16920.34652777778,19517.22962962963,16433.344444444447,18919.96851851852,24715.022222222226,28833.288888888892,34655.51851851852,39617.61666666671,40562.2981481482,47644.98518518519,53968.71481481482,76986.94814814816,75871.23518518519,80907.38055555556,71099.85370370372,65153.21296296296,41029.48888888889,34231.64444444445,42678.433333333385,39688.23888888889,29679.997222222224,30952.413888888892,33085.27777777778,37552.49166666667,41199.77037037042,48144.69351851852,48806.265277777784,47230.490740740745,38863.23194444445,24051.864814814817,14863.037962962964,25886.39490740741,35344.8925925926,38713.48101851852,35663.275,41434.023611111115,39234.44027777778,34628.04444444445,37419.48055555556,14596.341666666667,8984.412037037036,23420.39814814815,16686.35925925926,24582.591203703705,26682.8962962963,23461.822222222225,28147.107870370375,21550.372685185186,20681.228240740744,21857.96851851852,13703.684259259262,11611.655555555557,6701.60925925926,7925.742592592594,5559.377777777779],"Espana":[null,null,2723.3333333333335,2293.3333333333335,7073.333333333334,18152.847222222223,16782.03703703704,21111.689814814818,28005.740740740745,28886.574074074077,27796.89814814815,17512.685185185186,7453.333333333334,9035.671296296297,13091.111111111113,12595.416666666668,5562.1296296296305,7343.564814814816,5835.833333333334,4626.481481481482,8882.754629629631,3928.726851851852,5349.768518518519,2290.3472222222226,1135.7175925925926,null,2022.5694444444446,3025.592592592593,3749.6527777777783,3416.4583333333335,2338.6805555555557,960.5023148148149,847.4074074074075,877.962962962963,537.7777777777778,2087.6087962962965,1347.4074074074076,1986.2962962962965,997.3652777777779,2003.830092592593,1083.0592592592595,5462.916203703705,1991.8981481481483,null,268.8888888888889,924.8148148148149,null,null,549.3981481481482,441.0185185185186,296.3888888888889,null,191.4814814814815,null,null,null],"Paises Bajos":[null,null,3919.093518518519,4131.944444444445,27443.19490740741,41483.54212962963,32127.083333333336,4675.416666666667,247.91666666666669,null,null,null,836.1111111111112,2312.916666666667,11180.555555555557,5628.194444444445,7043.750000000001,11607.361111111113,10162.63888888889,13729.722222222224,8959.02777777778,5986.944444444445,5122.63888888889,3661.388888888889,2255.5555555555557,null,3762.5000000000005,3408.6111111111113,4595.694444444445,5238.333333333334,5942.222222222223,12333.611111111113,2978.6111111111113,1397.0833333333335,1397.0833333333335,3511.666666666667,4820.277777777778,1545.8333333333335,2086.388888888889,3450.416666666667,3529.166666666667,418.0555555555556,781.6666666666667,null,null,null,null,null,null,null,null,null,null,null,null,null]},"chFertilPrecio":{"labels":["Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"Estados Unidos":[4.773575194979789,4.8951880978919595,5.009700023649445,4.980295844196716,5.360315303296223,5.634061765732141,5.429894440251084,5.3032495819268615,5.476729764043399,5.37638972592408,5.46092796776586,5.373172666868382,5.297140858385673,5.570433627008804,5.569670749547499,5.323001755068123,5.346122730093589,5.5588110308499274,5.283021401216477,5.509817415494731,5.547419482823955,5.619364409452042,5.37099774877399,5.643315554019484,5.60031184002869,5.6076722411333835,5.5075776468328845,5.496533320966806,5.368350761230607,5.433436753294873,5.3616146737666135,5.7276541854508105,5.504852581765827,5.5841323995709615,5.397979417349092,5.259588931788184,5.891398222814252,6.082245669942486,5.746819716580777,5.502647001790089,5.825585646014405,6.034368688565312,5.950106251055863,5.669434496373182,5.714723904962022,5.500491339541568,5.883056855347124,5.647041429502813,6.272310412147761,6.078440167111259,5.889764384433617,5.931517939205474,6.072951037100271,5.9848853503504245,5.752727080952178,6.402550002769095],"Brasil":[5.0493667515418466,5.022748767341538,5.643433194077569,5.939159070379291,6.788263616942217,7.1866138833865625,7.1451592425321175,7.212231609641603,7.695908359811468,7.637008369737916,7.1271532835663844,7.131647913664813,7.096656346757743,6.5714216421736795,6.374116356552522,6.0897115604743774,6.190362930881105,6.03739422390242,6.144714414466055,5.706759705184792,5.016519265145101,4.849457099922407,4.864694065166236,4.7910899197682335,4.716110540195489,4.690531418992857,4.881730389263045,5.449436074563646,5.85827915625068,5.947339508918496,5.7759507663556455,5.3073893097789,5.583228266329233,5.728712991178436,5.80610370197732,5.862514218193503,5.615268806171035,5.935269428849684,6.079131013859525,6.404020059678288,6.021184018458773,6.666800831180806,6.060658661957446,5.862945950428766,5.934160648632632,6.067355174543927,6.082430330216706,6.370731566989309,6.5626505927909,7.137439777901649,7.00977300811006,6.492671744189637,6.330490673755409,6.82536398366348,6.5633846824230275,6.567727544737537],"Espana":[null,null,8.874765678421834,9.530205980884993,7.578867472709446,6.283976931674758,6.23441561752102,6.879250234542913,6.471176379909559,6.853354570471577,6.625364303837209,7.648944867751604,6.7743273985291195,7.171862233372359,5.1707827248423435,5.2606354833729565,5.729297587328985,5.992305088987101,8.18363580170768,6.138565038589711,4.674299706847257,4.835789907427519,5.859007204884098,3.5162789972665673,4.186045612511139,null,5.823044738269001,8.838005769226767,7.432848401109411,6.516816410214878,6.799415687102711,8.3701771783638,7.20906338294034,7.291276117038178,7.113928911371462,8.876218736638322,14.509507660939047,8.124337981713966,8.249539609311384,11.286078487091988,12.454159753899747,9.033119915831652,10.285387865747472,null,7.274653882320162,7.2955388675436526,null,null,8.241580139997405,48.29404346393187,43.752335740614804,null,21.114002550040112,null,null,null],"Paises Bajos":[null,null,9.531312512921426,7.210403805609121,7.6115139109571475,8.172293280550214,6.92202061070886,6.016056844355306,7.336218487394958,null,null,null,6.4099540662641195,6.843786891331992,7.082319034165839,6.467722766891477,6.8472022204568015,5.812478584001531,6.008503693890613,6.278397055069665,6.3440139441332715,6.085797629123123,6.39914249902976,6.402579214010129,6.176470545991933,null,8.495237782563985,8.760605788662021,9.428572136576808,7.851978975469455,7.000383711613804,7.475201056894477,6.702041117245423,9.224385986249098,9.224386318596448,9.684896527497033,9.107537742080092,10.028571555291705,10.1757944731139,11.608908784698707,13.62720077174695,14.009145403607974,7.91451407521861,null,null,null,null,null,null,null,null,null,null,null,null,null]},"chPlato":{"labels":["Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"volumen":[1374.553773,736.6538780000001,686.1161480000001,33.714029000000004,137.831998,328.138529,36.924656000000006,115.997367,36.211115,2.687612,2.68508,4.471859,1.27,36.44086,4.589,777.110473,4391.63076,1236.5806850000001,1387.0867409999998,1729.8722209999999,2022.960194,1701.2064269999998,339.229485,657.3699620000001,483.51259000000005,92.64004,164.58153,193.99981,714.28082,38.153589999999994,126.00236,61.32727,354.15335999999996,161.00826,15.696,11.695,11.609,12.267,13.041,10.489,13.419,9.878,37.836,159.01709,181.91317,168.70366,93.442,171.49603,617.364068,608.5401629999999,1004.8311090000001,2644.2709130000003,2911.637241,3651.413077,2156.388775,2334.086394],"precio":[1.421706324893395,1.7470651576643976,1.694962221121547,1.8082208828871358,2.8789957340971872,2.7858599136712257,2.501023758165595,2.406558488897813,2.4922111952402655,3.6432260313988847,4.224520599768722,4.7702695426296975,6.709376758972023,2.9711041947714736,3.8635129688784704,1.9667424383240681,1.3840628164310154,1.494465163894817,1.5205807081075762,1.5778266257012634,1.6844017282204715,1.5355736584708837,2.103197963247036,2.1365777579163403,1.9358465657314856,3.063217053960912,2.350910846325921,2.3101079259892936,2.1340556112765423,2.7473832379776586,2.775163740194509,2.8625309854992405,2.826553564547037,2.9103468621064095,6.58759207506696,7.413064815014152,6.937172973912628,8.377719739999836,7.1902126316123764,7.392580263211974,6.585218842795552,5.459946328988125,5.389872238414791,3.438243626864383,2.514433586560368,2.671892299995163,4.073276407741605,2.4047790191811553,1.317083690107018,1.442439417558964,1.1592668077851578,0.7784700162107557,0.7386938035873233,0.7069857459528811,0.812997986600895,1.1438093247269536]},"chOtros":{"labels":["Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"opciones":["Yema Liquida","Huevo Liquido","Albumina Seca","Huevo en Polvo","Yema Seca"],"series":{"Yema Liquida":{"volumen":[345.30478999999997,335.21038799999997,167.14252,18.144,20.005599999999998,null,166.464,687.80116,388.05401,222.055024,147.968,166.94028,457.73990000000003,478.31352000000004,284.69214,298.38329000000004,713.2523299999999,205.01966000000002,532.42968,205.41275,220.44958,107.684628,245.06192000000001,617.82131,652.88459,324.85470000000004,448.65396000000004,221.991841,731.67946,474.63254,307.57346,173.45313000000002,274.99411,329.95228000000003,442.27555,661.27259,747.7699299999999,230.00794,420.08595,205.69625,607.3799,744.60437,850.2713200000001,517.55918,644.02591,721.78816,512.20481,612.23837,490.90673,634.67548,688.51527,443.4638,408.71518,708.7475,550.0206699999999,643.34651]},"Huevo Liquido":{"volumen":[null,3.12984,null,3.683232,null,4.7628,null,null,2.0412,null,null,0.5715359999999999,null,1.63296,2.49192,1.8370799999999998,163.296,73.29903999999999,0.88452,1.1566800000000002,0.95256,19.11924,7.51361,14.288178,10.5462,20.221190999999997,23.282991000000003,1.90512,null,11.199236,1.22472,8.064872000000001,4.545072,null,0.0272,3.919038,3.919038,null,null,8.98128,8.98128,4.89888,null,null,null,null,null,null,11.430719999999999,null,9.79776,null,14.696639999999999,13.893768,null,11.430719999999999]},"Albumina Seca":{"volumen":[null,null,null,null,null,null,null,0.002,0.001,null,0.000077,null,null,null,0.02025,null,0.060003,0.000002,null,null,null,0.000051,null,null,null,0.000003,null,0.0001,null,null,0.00005,null,0.004535999999999999,null,null,null,null,null,null,null,null,null,0.020030000000000003,0.005101,null,null,0.2,null,null,null,null,null,0.000006,1.20006,0.0025,null]},"Huevo en Polvo":{"volumen":[null,null,18.00338,null,null,null,null,0.001,null,null,0.0005,null,null,null,null,null,0.02,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.0039,0.009071999999999998,null,null,null,null,null,null,0.1,24,null,40.04,null,null,null,20,0.1,1.5,null,20,null,0.6,20,20,4]},"Yema Seca":{"volumen":[17.96256,null,36.49212,18.3708,20.02,null,null,16.877,16.875,16.875,36.875,null,null,null,20,null,17.6904,17.96256,35.92512,35.92512,null,null,null,54.295919999999995,17.6904,17.6904,17.6904,null,null,18.144,18.144,null,33.284536,null,4.38,null,null,null,null,null,null,21,null,null,20,null,0.2,null,null,null,null,null,0.701,null,null,null]}}},"chExpoHuevo":{"labels":["Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"opciones":["Huevo para Plato","Huevo Fertil","Yema Liquida","Huevo en Polvo","Albumina Seca","Huevo Liquido"],"series":{"Huevo para Plato":{"volumen":[null,3.009,6.07046,89.0082,752.415,1.74,2.025,5.481,14.95518,3.6018000000000003,3,17.69,19.936400000000003,13.722,96.54216000000001,227.37487999999996,14.208,18.1638,0.2238,4.11,12.45,1.3037999999999998,0.2238,1.0338,12.823799999999999,10.303799999999999,13.5432,22.8696,25.10084,15.102,1.95,21.7332,8.8896,6.8568,16.1952,314.43649300000004,835.6060130000001,1604.670335,1404.3651100000002,3209.5679,2717.0809,1669.94203,3257.7735,2065.6048,1325.8627999999999,458.261,445.46739800000006,95.741,8.405700000000001,21.46848,29.55282,44.53571999999999,14.66562,5.688,6.18,null]},"Huevo Fertil":{"volumen":[3.0473000000000003,5.2855,null,null,null,null,null,null,null,null,null,null,null,null,0.013800000000000002,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.546,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,9.336]},"Yema Liquida":{"volumen":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.438,null,0.001,null,null,null,null,null,null,null,null,null,null,null,18,95,92.15,151.75,151.05,53.2,null,0.0015,null,null,null,null,null,null]},"Huevo en Polvo":{"volumen":[null,40,null,null,null,null,null,null,20,0.02,20.3,null,null,18.002,0.76,0.5,null,null,null,null,0.00075,null,null,5.5,null,null,null,1.02,0.0001,null,17.98,null,null,null,null,null,null,null,2.4016100000000002,3,null,null,null,null,0.9,null,5.2269,null,null,null,21.6,21.6,21.6,0.0043,0.02,null]},"Albumina Seca":{"volumen":[null,null,4.5,null,null,18,6,6,6,24.5,10,5,null,null,4.5,null,null,null,null,null,5,null,5,null,null,5,5,null,null,5,null,5,null,null,null,null,5,5,null,5,null,null,null,5,0.9,5,null,5,null,5,null,5,null,null,null,5]},"Huevo Liquido":{"volumen":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1,null,null,null,null,null,null,40.404,null,null,null,null,40.404,null,null,null,40.404,null,null,null,20.202,null,null,null,null,null,null,null,null]}}},"chDual":{"labels":["Ene 15","Feb 15","Mar 15","Abr 15","May 15","Jun 15","Jul 15","Ago 15","Sep 15","Oct 15","Nov 15","Dic 15","Ene 16","Feb 16","Mar 16","Abr 16","May 16","Jun 16","Jul 16","Ago 16","Sep 16","Oct 16","Nov 16","Dic 16","Ene 17","Feb 17","Mar 17","Abr 17","May 17","Jun 17","Jul 17","Ago 17","Sep 17","Oct 17","Nov 17","Dic 17","Ene 18","Feb 18","Mar 18","Abr 18","May 18","Jun 18","Jul 18","Ago 18","Sep 18","Oct 18","Nov 18","Dic 18","Ene 19","Feb 19","Mar 19","Abr 19","May 19","Jun 19","Jul 19","Ago 19","Sep 19","Oct 19","Nov 19","Dic 19","Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26"],"pollita":[8236735,7964050,8909638,8192280,8490704,8438318,8285038,8220967,8312175,7407906,6961327,7779800,7602199,8114127,8723292,8438836,9206610,9258320,6345720,8270638,8789778,7512145,6684168,7067088,9143240,7493147,8190865,7923903,8700765,7595641,7686858,8437050,8082219,8052815,8304111,8531232,7501739,7886248,8766026,8010945,8688973,7588810,9538318,8148255,8101064,9116267,8406481,9048182,8246960,8462913,8151364,7879776,8901256,8212708,8870584,8212290,8108175,8655749,8228846,8851500,7943848,8715065,9942336,9082801,7907871,8513761,9026029,9134304,8666145,9719598,8900665,9321759,8632171,9807379,10090987,9917822,8715402,9225656,9232402,10002838,9488205,8560719,8987403,9394360,9069920,7957446,9482155,8180573,9465966,9544462,8716509,8897908,8732663,9286255,8295719,8552890,8301220,8596218,10113589,8571390,9232309,9962464,9355221,9877222,9569683,9222078,10542784,9843917,9925299,8523641,9493987,10201793,9065749,9116488,10099805,9485052,10303492,10013208,9995747,10415741,10354316,9504122,9588289,10008056,10924853,9714435,10861508,10034199,10669355,10868557,10424924,10838405,10276974,9996169,10053728,9352467,9125830,9370668,9582775],"precio":[26.66,27.75,28.53,24.32,16.03,17.64,15.65,16.83,16.1,17.48,15.18,15.45,15.02,20.25,17.71,18.1,13.91,12.62,12.22,13.92,15.63,14.05,15.04,17.6018,15.54,17.1,15.16,15.38,18.48,15.3,17.01,19.28,19.5,20.16,21.44,24.571,25.88,27.43,25.8,21.85,15.86,14.17,15.48,16.83,17.66,19.23,21.05,21.78,21.2,24.51,22,22,20.73,18.04,20.68,23.38,23.11,25.46,27.19,23.68,24.05,27.75,29.67,30.67,24.18,24.07,24.49,21.99,21.5,24.75,27.5,28.55,24.64,27.8,30.58,28.34,25.96,23.58,24.63,22.68,26.08,26.92,26.38,26.06,28.03,30,33.14,31.36,32.66,34.32,36.11,34.45,36.65,36.68,36.19,34.12,37.06,40.54,39.15,40.53,31.83,26.56,26.12,30.81,30.37,33.97,35.73,31.62,29.28,31.08,28.09,35.57,31.95,32.44,34.82,38.63,36.5,38.16,36.1,34.16,32.25,38.63,34.14,31.12,33.42,32.35,39.64,33.19,33.54,31.39,30.66,24.17,21.34,22.62,23.16,21.3,16.75,18.41,20.18]},"chRezago":{"labels":["0 m","1 m","2 m","3 m","4 m","5 m","6 m","7 m","8 m","9 m","10 m","11 m","12 m"],"r":[4.1,-5.8,-12.7,-14.2,-14.4,-21.6,-20.9,-18,-15.5,-13.5,-15,-9.7,-10.9]},"chConsumidor":{"labels":[2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],"blanco":[20.48,21.37,23.64,24.06,27.2,27.82,33.48,37.4,38.93,41.86,34.03],"rojo":[20.69,22.32,24.48,25.94,30.87,29.73,35.68,42.78,47.52,49.35,48.71]},"chFocosMes":{"labels":["Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26","Sep 26"],"United States of America":[182,114,66,18,11,3,0,7,41,65,121,90,58,71,64,13,22,7,2,10,10],"Canada":[20,3,5,6,4,3,8,0,9,42,35,15,10,5,0,5,5,0,0,0,4],"Peru":[7,7,3,3,2,1,1,1,0,0,2,1,1,4,11,20,20,14,27,9,2],"Chile":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,19,9,2,0,2,1],"Mexico":[3,4,0,14,1,1,0,0,2,0,3,0,3,0,2,2,1,3,1,0,0],"otros":[1,2,0,3,7,6,10,5,0,1,4,6,1,14,17,2,1,8,6,1,3]},"chTipoUnidad":{"labels":["Aves de producción","Doméstica o traspatio","Fauna silvestre"],"focos":[749,549,183]},"chAvesTipo":{"labels":["Aves de producción","Doméstica o traspatio","Fauna silvestre"],"aves":[85654487,32357,2670]}};
+Chart.defaults.font.family = "'Poppins','Montserrat','Segoe UI',system-ui,sans-serif";
+Chart.defaults.font.size = 11.5;
+Chart.defaults.color = '#5a6478';
+Chart.defaults.plugins.legend.labels.boxWidth = 12;
+Chart.defaults.plugins.legend.labels.boxHeight = 12;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.tooltip.backgroundColor = '#06254B';
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+Chart.defaults.maintainAspectRatio = false;
+const fmt = (v, d = 0) => v === null || v === undefined ? '—' : Number(v).toLocaleString('es-MX', {minimumFractionDigits: d, maximumFractionDigits: d});
+const fmtC = (v) => { if (v === null || v === undefined) return '—'; const a = Math.abs(v);
+  if (a >= 1e9) return (v/1e9).toFixed(2)+' MM'; if (a >= 1e6) return (v/1e6).toFixed(1)+' M';
+  if (a >= 1e3) return (v/1e3).toFixed(0)+' mil'; return fmt(v); };
+const ejeMoneda = { ticks: { callback: (v) => '$' + fmt(v, 0) } };
+const ejeCompacto = { ticks: { callback: (v) => fmtC(v) } };
+(() => { const D = DATOS.chPrecio;
+  new Chart(document.getElementById("chPrecio"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "Precio al productor",
+      data: D["precio"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Promedio móvil 12 meses",
+      data: D["pm12"],
+      borderColor: "#F8D227",
+      backgroundColor: "#F8D22722",
+      borderWidth: 2.4,
+      borderDash: [6,4],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + '$' + fmt(c.parsed.y, 2) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Pesos por kilogramo" }, ...(ejeMoneda) } }
+    }
+  }); })();
+(() => { const D = DATOS.chPrecioYoy;
+  new Chart(document.getElementById("chPrecioYoy"), {
+    type: 'bar',
+    data: { labels: D["labels"], datasets: [{
+      label: "Variación interanual",
+      data: D["yoy"],
+      backgroundColor: "#0EA5E9",
+      borderRadius: 4,
+      borderSkipped: false
+    }] },
+    plugins: [],
+    options: {
+      indexAxis: "x",
+      layout: { padding: { right: 0 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.y) } } },
+      scales: {
+        x: { stacked: false, grid: { display: false }, title: { display: false, text: "Variación %" }, ...({}) },
+        y: { stacked: false, grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Variación %" }, ...({}) }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chPollitaSM;
+  new Chart(document.getElementById("chPollitaSM"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "Suma móvil 12 meses",
+      data: D["sm12"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: true,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmt(c.parsed.y, 1) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Aves (suma 12 meses)" }, ...({}) } }
+    }
+  }); })();
+(() => { const D = DATOS.chPollitaAnual;
+  new Chart(document.getElementById("chPollitaAnual"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "2022",
+      data: D["a2022"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2023",
+      data: D["a2023"],
+      borderColor: "#F8D227",
+      backgroundColor: "#F8D22722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2024",
+      data: D["a2024"],
+      borderColor: "#0EA5E9",
+      backgroundColor: "#0EA5E922",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2025",
+      data: D["a2025"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2026",
+      data: D["a2026"],
+      borderColor: "#C8A84B",
+      backgroundColor: "#C8A84B22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmt(c.parsed.y, 1) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Aves por mes" }, ...({}) } }
+    }
+  }); })();
+(() => { const D = DATOS.chAves;
+  new Chart(document.getElementById("chAves"), {
+    type: 'bar',
+    data: { labels: D["labels"], datasets: [{
+      label: "Aves de postura",
+      data: D["valores"],
+      backgroundColor: "#03488D",
+      borderRadius: 4,
+      borderSkipped: false
+    }] },
+    plugins: [],
+    options: {
+      indexAxis: "x",
+      layout: { padding: { right: 0 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.y) } } },
+      scales: {
+        x: { stacked: false, grid: { display: false }, title: { display: false, text: "Número de aves" }, ...({}) },
+        y: { stacked: false, grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Número de aves" }, ...(ejeCompacto) }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chProduccion;
+  new Chart(document.getElementById("chProduccion"), {
+    data: { labels: D["labels"], datasets: [{ type: 'bar', label: "Producción (t)", data: D["produccion"], backgroundColor: "#03488D", borderRadius: 4, yAxisID: 'y', order: 5 },{ type: 'line', label: "Consumo per cápita (kg/hab)", data: D["percapita"], borderColor: "#F8D227", backgroundColor: "#F8D227", borderWidth: 3.2, borderDash: [], pointRadius: 0, pointHoverRadius: 5, tension: .3, spanGaps: true, yAxisID: "y1", order: 1, borderJoinStyle: 'round', borderCapStyle: 'round' }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom',
+        // El 'order' de los datasets altera tambien el orden de la leyenda;
+        // se reordena por indice para conservar el orden de declaracion.
+        labels: { sort: (a, b) => a.datasetIndex - b.datasetIndex } } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { position: 'left', grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Toneladas" }, ...ejeCompacto },
+        y1: { display: true, position: 'right', grid: { display: false }, title: { display: true, text: "kg/hab" } }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chPaisHuevo;
+  let activa = D.opciones[0];
+  const ch = new Chart(document.getElementById("chPaisHuevo"), {
+    type: 'bar',
+    data: { labels: D.series[activa].labels, datasets: [{
+      label: "Volumen importado (t)", data: D.series[activa].valores,
+      backgroundColor: "#03488D", borderRadius: 4, borderSkipped: false
+    }] },
+    plugins: [{ afterDatasetsDraw(ch2) {
+      const ctx = ch2.ctx; ctx.save();
+      ctx.font = '600 10px Poppins, system-ui, sans-serif';
+      ctx.fillStyle = '#5a6478'; ctx.textBaseline = 'middle';
+      ch2.getDatasetMeta(0).data.forEach((el, i) => {
+        const v = ch2.data.datasets[0].data[i];
+        if (v === null || v === undefined) return;
+        ctx.fillText(fmtC(v), el.x + 6, el.y);
+      });
+      ctx.restore();
+    } }],
+    options: {
+      indexAxis: 'y',
+      layout: { padding: { right: 54 } },
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.x) } } },
+      scales: {
+        x: { grid: { display: true }, title: { display: true, text: "Toneladas" }, ...ejeCompacto },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, ticks: { font: { size: 10 }, autoSkip: false } }
+      }
+    }
+  });
+  const cont = document.getElementById("ctrlPaisHuevo");
+  const pintar = () => {
+    [...cont.querySelectorAll('button')].forEach((b) => b.classList.toggle('on', b.dataset.op === activa));
+  };
+  D.opciones.forEach((op) => {
+    const b = document.createElement('button');
+    b.textContent = op; b.dataset.op = op;
+    b.addEventListener('click', () => {
+      activa = op;
+      ch.data.labels = D.series[activa].labels;
+      ch.data.datasets[0].data = D.series[activa].valores;
+      ch.update();
+      pintar();
+    });
+    cont.appendChild(b);
+  });
+  pintar();
+  })();
+(() => { const D = DATOS.chFertilCajas;
+  new Chart(document.getElementById("chFertilCajas"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "Estados Unidos",
+      data: D["Estados Unidos"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Brasil",
+      data: D["Brasil"],
+      borderColor: "#F8D227",
+      backgroundColor: "#F8D22722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Espana",
+      data: D["Espana"],
+      borderColor: "#0EA5E9",
+      backgroundColor: "#0EA5E922",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Paises Bajos",
+      data: D["Paises Bajos"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.y) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Cajas de 360 huevos" }, ...(ejeCompacto) } }
+    }
+  }); })();
+(() => { const D = DATOS.chFertilPrecio;
+  new Chart(document.getElementById("chFertilPrecio"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "Estados Unidos",
+      data: D["Estados Unidos"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Brasil",
+      data: D["Brasil"],
+      borderColor: "#F8D227",
+      backgroundColor: "#F8D22722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Espana",
+      data: D["Espana"],
+      borderColor: "#0EA5E9",
+      backgroundColor: "#0EA5E922",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Paises Bajos",
+      data: D["Paises Bajos"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + '$' + fmt(c.parsed.y, 2) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "USD por kilogramo" }, ...(ejeMoneda) } }
+    }
+  }); })();
+(() => { const D = DATOS.chPlato;
+  new Chart(document.getElementById("chPlato"), {
+    data: { labels: D["labels"], datasets: [{ type: 'bar', label: "Volumen importado (t)", data: D["volumen"], backgroundColor: "#03488D", borderRadius: 4, yAxisID: 'y', order: 5 },{ type: 'line', label: "Precio implícito (USD/kg)", data: D["precio"], borderColor: "#F8D227", backgroundColor: "#F8D227", borderWidth: 3.2, borderDash: [], pointRadius: 0, pointHoverRadius: 5, tension: .3, spanGaps: true, yAxisID: "y1", order: 1, borderJoinStyle: 'round', borderCapStyle: 'round' }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom',
+        // El 'order' de los datasets altera tambien el orden de la leyenda;
+        // se reordena por indice para conservar el orden de declaracion.
+        labels: { sort: (a, b) => a.datasetIndex - b.datasetIndex } } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { position: 'left', grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Toneladas" }, ...ejeCompacto },
+        y1: { display: true, position: 'right', grid: { display: false }, title: { display: true, text: "USD/kg" } }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chOtros;
+  let activa = D.opciones[0];
+  const fm = (v) => fmtC(v);
+  const ch = new Chart(document.getElementById("chOtros"), {
+    type: 'line',
+    data: { labels: D.labels, datasets: [{
+      label: "Volumen importado (t)",
+      data: D.series[activa]["volumen"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 5,
+      tension: .3, spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fm(c.parsed.y) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Toneladas" }, ...ejeCompacto } }
+    }
+  });
+  const cont = document.getElementById("ctrlOtros");
+  const claves = ["volumen"];
+  const pintar = () => {
+    [...cont.querySelectorAll('button')].forEach((b) => b.classList.toggle('on', b.dataset.op === activa));
+  };
+  D.opciones.forEach((op) => {
+    const b = document.createElement('button');
+    b.textContent = op; b.dataset.op = op;
+    b.addEventListener('click', () => {
+      activa = op;
+      ch.data.datasets.forEach((d, i) => { d.data = D.series[activa][claves[i]]; });
+      ch.update();
+      pintar();
+    });
+    cont.appendChild(b);
+  });
+  pintar();
+  })();
+(() => { const D = DATOS.chExpoHuevo;
+  let activa = D.opciones[0];
+  const fm = (v) => fmtC(v);
+  const ch = new Chart(document.getElementById("chExpoHuevo"), {
+    type: 'line',
+    data: { labels: D.labels, datasets: [{
+      label: "Volumen exportado (t)",
+      data: D.series[activa]["volumen"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 5,
+      tension: .3, spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fm(c.parsed.y) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Toneladas" }, ...ejeCompacto } }
+    }
+  });
+  const cont = document.getElementById("ctrlExpoHuevo");
+  const claves = ["volumen"];
+  const pintar = () => {
+    [...cont.querySelectorAll('button')].forEach((b) => b.classList.toggle('on', b.dataset.op === activa));
+  };
+  D.opciones.forEach((op) => {
+    const b = document.createElement('button');
+    b.textContent = op; b.dataset.op = op;
+    b.addEventListener('click', () => {
+      activa = op;
+      ch.data.datasets.forEach((d, i) => { d.data = D.series[activa][claves[i]]; });
+      ch.update();
+      pintar();
+    });
+    cont.appendChild(b);
+  });
+  pintar();
+  })();
+(() => { const D = DATOS.chDual;
+  new Chart(document.getElementById("chDual"), {
+    data: { labels: D["labels"], datasets: [{ type: 'bar', label: "Venta de pollita (aves)", data: D["pollita"], backgroundColor: "#03488D", borderRadius: 4, yAxisID: 'y', order: 5 },{ type: 'line', label: "Precio del huevo al productor ($/kg)", data: D["precio"], borderColor: "#F8D227", backgroundColor: "#F8D227", borderWidth: 3.2, borderDash: [], pointRadius: 0, pointHoverRadius: 5, tension: .3, spanGaps: true, yAxisID: "y1", order: 1, borderJoinStyle: 'round', borderCapStyle: 'round' }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom',
+        // El 'order' de los datasets altera tambien el orden de la leyenda;
+        // se reordena por indice para conservar el orden de declaracion.
+        labels: { sort: (a, b) => a.datasetIndex - b.datasetIndex } } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { position: 'left', grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Aves vendidas" }, ...ejeCompacto },
+        y1: { display: true, position: 'right', grid: { display: false }, title: { display: true, text: "$/kg de huevo" } }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chRezago;
+  new Chart(document.getElementById("chRezago"), {
+    type: 'bar',
+    data: { labels: D["labels"], datasets: [{
+      label: "Correlación con el precio",
+      data: D["r"],
+      backgroundColor: "#0EA5E9",
+      borderRadius: 4,
+      borderSkipped: false
+    }] },
+    plugins: [],
+    options: {
+      indexAxis: "x",
+      layout: { padding: { right: 0 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.y) } } },
+      scales: {
+        x: { stacked: false, grid: { display: false }, title: { display: false, text: "Correlación (%)" }, ...({}) },
+        y: { stacked: false, grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Correlación (%)" }, ...({}) }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chConsumidor;
+  new Chart(document.getElementById("chConsumidor"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "Huevo blanco",
+      data: D["blanco"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Huevo rojo",
+      data: D["rojo"],
+      borderColor: "#b85c00",
+      backgroundColor: "#b85c0022",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + '$' + fmt(c.parsed.y, 2) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Pesos por kilogramo" }, ...(ejeMoneda) } }
+    }
+  }); })();
+(() => { const D = DATOS.chFocosMes;
+  new Chart(document.getElementById("chFocosMes"), {
+    type: 'bar',
+    data: { labels: D["labels"], datasets: [{
+      label: "United States of America",
+      data: D["United States of America"],
+      backgroundColor: "#03488D",
+      borderRadius: 4,
+      borderSkipped: false
+    },{
+      label: "Canada",
+      data: D["Canada"],
+      backgroundColor: "#F8D227",
+      borderRadius: 4,
+      borderSkipped: false
+    },{
+      label: "Peru",
+      data: D["Peru"],
+      backgroundColor: "#0EA5E9",
+      borderRadius: 4,
+      borderSkipped: false
+    },{
+      label: "Chile",
+      data: D["Chile"],
+      backgroundColor: "#2e8b57",
+      borderRadius: 4,
+      borderSkipped: false
+    },{
+      label: "Mexico",
+      data: D["Mexico"],
+      backgroundColor: "#C8A84B",
+      borderRadius: 4,
+      borderSkipped: false
+    },{
+      label: "Otros países",
+      data: D["otros"],
+      backgroundColor: "#9AA5B1",
+      borderRadius: 4,
+      borderSkipped: false
+    }] },
+    plugins: [],
+    options: {
+      indexAxis: "x",
+      layout: { padding: { right: 0 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.y) } } },
+      scales: {
+        x: { stacked: true, grid: { display: false }, title: { display: false, text: "Focos notificados" }, ...({}) },
+        y: { stacked: true, grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Focos notificados" }, ...(ejeCompacto) }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chTipoUnidad;
+  new Chart(document.getElementById("chTipoUnidad"), {
+    type: 'bar',
+    data: { labels: D["labels"], datasets: [{
+      label: "Focos",
+      data: D["focos"],
+      backgroundColor: "#03488D",
+      borderRadius: 4,
+      borderSkipped: false
+    }] },
+    plugins: [{ afterDatasetsDraw(ch) {
+        const ctx = ch.ctx; ctx.save();
+        ctx.font = '600 10px Poppins, system-ui, sans-serif';
+        ctx.fillStyle = '#5a6478'; ctx.textBaseline = 'middle';
+        const f = (v) => fmtC(v);
+        ch.data.datasets.forEach((ds, di) => {
+          const meta = ch.getDatasetMeta(di);
+          if (meta.hidden) return;
+          meta.data.forEach((el, i) => {
+            const v = ds.data[i];
+            if (v === null || v === undefined) return;
+            ctx.fillText(f(v), el.x + 6, el.y);
+          });
+        });
+        ctx.restore();
+      } }],
+    options: {
+      indexAxis: "y",
+      layout: { padding: { right: 54 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.x) } } },
+      scales: {
+        x: { stacked: false, grid: { display: true }, title: { display: true, text: "Focos notificados" }, ...(ejeCompacto) },
+        y: { stacked: false, grid: { color: 'rgba(6,37,75,.07)' }, title: { display: false, text: "Focos notificados" }, ticks: { font: { size: 10 }, autoSkip: false, callback: function(v) {
+        const t = this.getLabelForValue(v);
+        if (t.length <= 15) return t;
+        const palabras = t.split(' '); const lineas = [''];
+        for (const p of palabras) {
+          const i = lineas.length - 1;
+          if ((lineas[i] + ' ' + p).trim().length <= 15) lineas[i] = (lineas[i] + ' ' + p).trim();
+          else lineas.push(p);
+        }
+        return lineas;
+      } }, ...({}) }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chAvesTipo;
+  new Chart(document.getElementById("chAvesTipo"), {
+    type: 'bar',
+    data: { labels: D["labels"], datasets: [{
+      label: "Aves perdidas",
+      data: D["aves"],
+      backgroundColor: "#EF4444",
+      borderRadius: 4,
+      borderSkipped: false
+    }] },
+    plugins: [{ afterDatasetsDraw(ch) {
+        const ctx = ch.ctx; ctx.save();
+        ctx.font = '600 10px Poppins, system-ui, sans-serif';
+        ctx.fillStyle = '#5a6478'; ctx.textBaseline = 'middle';
+        const f = (v) => fmtC(v);
+        ch.data.datasets.forEach((ds, di) => {
+          const meta = ch.getDatasetMeta(di);
+          if (meta.hidden) return;
+          meta.data.forEach((el, i) => {
+            const v = ds.data[i];
+            if (v === null || v === undefined) return;
+            ctx.fillText(f(v), el.x + 6, el.y);
+          });
+        });
+        ctx.restore();
+      } }],
+    options: {
+      indexAxis: "y",
+      layout: { padding: { right: 54 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.x) } } },
+      scales: {
+        x: { stacked: false, grid: { display: true }, title: { display: true, text: "Aves perdidas" }, ...(ejeCompacto) },
+        y: { stacked: false, grid: { color: 'rgba(6,37,75,.07)' }, title: { display: false, text: "Aves perdidas" }, ticks: { font: { size: 10 }, autoSkip: false, callback: function(v) {
+        const t = this.getLabelForValue(v);
+        if (t.length <= 15) return t;
+        const palabras = t.split(' '); const lineas = [''];
+        for (const p of palabras) {
+          const i = lineas.length - 1;
+          if ((lineas[i] + ' ' + p).trim().length <= 15) lineas[i] = (lineas[i] + ' ' + p).trim();
+          else lineas.push(p);
+        }
+        return lineas;
+      } }, ...({}) }
+      }
+    }
+  }); })();
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "una-reportes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Generador de reportes HTML de la UNA a partir del backend de market intelligence. No modifica el backend ni el frontend: solo consume sus endpoints.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "generar": "node generate.js",
+    "generar:huevo": "node generate.js huevo",
+    "generar:pollo": "node generate.js pollo"
+  }
+}

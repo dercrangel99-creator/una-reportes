@@ -1,0 +1,17 @@
+# Dependencias
+node_modules/
+
+# Logs y temporales
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Variables de entorno
+.env
+.env.*
+
+# Sistema operativo / editores
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/

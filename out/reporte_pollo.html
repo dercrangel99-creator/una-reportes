@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNA · Pollo — Reporte Analítico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --azul:#03488D; --marino:#06254B; --hueso:#F2F8FF; --tinta:#1C1C1C;
+  --gris:#5a6478; --linea:#DCE6F5; --naranja:#b85c00; --dorado:#F8D227;
+  --rojo:#EF4444; --verde:#2e8b57; --cyan:#0EA5E9;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Poppins','Montserrat','Avenir Next','Segoe UI',system-ui,sans-serif;background:var(--hueso);color:var(--tinta);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+header{background:var(--marino);color:#fff;position:relative;overflow:hidden}
+header .wrap{display:flex;align-items:center;gap:28px;padding:32px 20px 28px;position:relative;z-index:1}
+.logo{flex:0 0 auto}
+.h-title h1{font-size:clamp(24px,3.4vw,38px);font-weight:800;text-transform:uppercase;letter-spacing:.5px;line-height:1.12}
+.h-title .sub{margin-top:8px;color:#A9C5E8;font-weight:500;font-size:14px;letter-spacing:.3px}
+.h-title .raya{width:56px;height:5px;background:var(--dorado);margin-top:14px;border-radius:2px}
+.dots{position:absolute;right:24px;bottom:18px;opacity:.5}
+
+nav{background:var(--azul);position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(6,37,75,.25)}
+nav .wrap{display:flex;gap:4px;overflow-x:auto;padding:0 20px}
+nav a{color:#fff;text-decoration:none;font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.8px;padding:13px 16px;white-space:nowrap;border-bottom:3px solid transparent}
+nav a:hover,nav a:focus-visible{border-bottom-color:var(--dorado);outline:none}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:26px 0}
+.kpi{background:#fff;border:1px solid var(--linea);border-top:5px solid var(--azul);border-radius:10px;padding:16px 18px}
+.kpi .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gris)}
+.kpi .val{font-size:30px;font-weight:800;color:var(--marino);margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.kpi .val small{font-size:15px;font-weight:600;color:var(--gris)}
+.kpi .delta{font-size:12.5px;font-weight:700}
+.kpi .delta.up{color:var(--verde)}.kpi .delta.dn{color:var(--rojo)}
+.kpi .note{font-size:11.5px;color:var(--gris);margin-top:3px}
+
+.banda{background:var(--azul);color:#fff;margin-top:40px;border-radius:10px;display:flex;align-items:center;gap:18px;padding:14px 22px;position:relative;overflow:hidden}
+.banda h2{font-size:clamp(17px,2.2vw,23px);font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.banda .num{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:20px;letter-spacing:1px;flex:0 0 auto}
+
+.grid{display:grid;gap:16px;margin-top:16px}
+.g2{grid-template-columns:1fr 1fr}
+@media(max-width:880px){.g2{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--linea);border-radius:12px;padding:18px 18px 14px;box-shadow:0 1px 3px rgba(6,37,75,.05)}
+.card h3{font-size:14.5px;font-weight:800;color:var(--marino);text-transform:uppercase;letter-spacing:.4px}
+.card .desc{font-size:12.5px;color:var(--gris);margin:4px 0 10px}
+.chart{position:relative;height:320px}
+.chart.tall{height:380px}
+.chart.short{height:280px}
+canvas{max-width:100%}
+.fuente{font-size:10.5px;color:#93A3BC;margin-top:8px;text-transform:uppercase;letter-spacing:.5px}
+
+details.como{margin-top:10px;border:1px solid var(--linea);border-radius:9px;background:#F7FBFF;font-size:13px}
+details.como summary{cursor:pointer;padding:9px 14px;font-weight:700;color:var(--azul);font-size:12.5px;list-style:none;display:flex;align-items:center;gap:8px}
+details.como summary::-webkit-details-marker{display:none}
+details.como summary::before{content:'?';display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--azul);color:#fff;font-size:11px;font-weight:800;flex:0 0 auto}
+details.como[open] summary{border-bottom:1px solid var(--linea)}
+details.como .cuerpo{padding:12px 16px 14px;color:var(--tinta)}
+details.como .cuerpo p{margin-bottom:8px}
+details.como .cuerpo p:last-child{margin-bottom:0}
+details.como strong{color:var(--marino)}
+
+.ctrl{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px;align-items:center}
+.ctrl .lblc{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--gris);margin-right:2px}
+.ctrl button{font:inherit;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:16px;border:1.5px solid var(--azul);background:#fff;color:var(--azul);cursor:pointer;font-variant-numeric:tabular-nums}
+.ctrl button.on{background:var(--azul);color:#fff}
+.ctrl button.all{border-color:var(--gris);color:var(--gris)}
+.ctrl button.all.on{background:var(--gris);color:#fff;border-color:var(--gris)}
+.ctrl button:focus-visible{outline:2px solid var(--dorado);outline-offset:2px}
+.hintc{font-size:11px;color:#93A3BC;margin:-4px 0 8px}
+
+.heat-wrap{overflow-x:auto}
+/* table-layout fijo: reparte las 12 columnas por igual para que todos los
+   mapas de calor queden con la misma proporcion, sin importar si una celda
+   dice "n/d" o "+27.7%". */
+.heat-table{width:100%;min-width:500px;table-layout:fixed;border-collapse:separate;border-spacing:2px;font-size:10.5px;font-variant-numeric:tabular-nums}
+.heat-table th{font-size:9.5px;font-weight:700;color:var(--gris);text-transform:uppercase;letter-spacing:.3px;padding:2px 0;text-align:center}
+.heat-table th.yr-col,.heat-table td.yr{width:44px}
+.heat-table td.yr{font-size:11.5px;font-weight:800;color:var(--marino);text-align:right;padding-right:8px;white-space:nowrap}
+.heat-cell{border-radius:5px;text-align:center;padding:9px 1px;font-weight:700;white-space:nowrap}
+.heat-cell.empty{background:#EEF4FC!important;color:#BFCDE0;font-weight:500;font-size:10px}
+
+.tabla-wrap{overflow-x:auto}
+table.datos{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+table.datos th{background:var(--marino);color:#fff;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;padding:9px 10px;text-align:left;position:sticky;top:0}
+table.datos td{padding:8px 10px;border-bottom:1px solid var(--linea)}
+table.datos tbody tr:nth-child(even){background:#F7FBFF}
+table.datos td.n{text-align:right}
+
+.lectura{background:#fff;border:1px solid var(--linea);border-left:6px solid var(--dorado);border-radius:10px;padding:16px 20px;margin-top:16px;font-size:14px}
+.lectura strong{color:var(--marino)}
+.lectura ul{margin:8px 0 0 18px}
+.lectura li{margin-bottom:6px}
+.metodo{background:var(--marino);color:#D7E4F4;border-radius:12px;padding:20px 24px;margin-top:16px;font-size:13.5px}
+.metodo h3{color:#fff;font-size:14px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.metodo p{margin-bottom:8px}
+.badge-r{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);padding:2px 10px;border-radius:14px;font-weight:700}
+.cofece{background:#fff;border:1px solid var(--linea);border-radius:12px;margin:34px 0 10px;padding:18px 22px;font-size:12px;color:var(--gris)}
+.cofece h4{color:var(--marino);font-size:12.5px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+footer{background:var(--marino);color:#A9C5E8;margin-top:26px;padding:20px 0;font-size:12px}
+footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
+.aviso{background:#FFF8E1;border:1px solid var(--dorado);border-radius:10px;padding:12px 18px;margin-top:16px;font-size:13px;color:var(--tinta)}
+@media print{nav{position:static}.chart{height:300px!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="logo"><svg width="78" height="92" viewBox="0 0 78 92" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="UNA">
+<ellipse cx="39" cy="34" rx="22" ry="27" stroke="#fff" stroke-width="2.6" fill="none"/>
+<path d="M39 14c-6 5-9 12-9 20 0 7 4 13 9 17 5-4 9-10 9-17 0-8-3-15-9-20z" stroke="#fff" stroke-width="2.2" fill="none"/>
+<circle cx="39" cy="24" r="2.6" fill="#F8D227"/>
+<text x="39" y="82" text-anchor="middle" font-family="Poppins,Segoe UI,sans-serif" font-size="25" font-weight="800" fill="#fff">UNA</text>
+</svg></div>
+    <div class="h-title">
+      <h1>Pollo: precio al productor,<br>oferta y comercio exterior</h1>
+      <div class="sub">Unión Nacional de Avicultores · Datos a jul de 2026</div>
+      <div class="raya"></div>
+    </div>
+    <svg class="dots" width="190" height="78" viewBox="0 0 190 78" xmlns="http://www.w3.org/2000/svg">
+<circle cx="6" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="6" r="2.3" fill="#fff" opacity="0.45"/><circle cx="6" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="20" r="2.3" fill="#fff" opacity="0.45"/><circle cx="6" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="34" r="2.3" fill="#fff" opacity="0.45"/><circle cx="6" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="48" r="2.3" fill="#fff" opacity="0.45"/><circle cx="6" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="62" r="2.3" fill="#fff" opacity="0.45"/><circle cx="6" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="20" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="34" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="48" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="62" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="76" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="90" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="104" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="118" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="132" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="146" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="160" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="174" cy="76" r="2.3" fill="#fff" opacity="0.45"/><circle cx="188" cy="76" r="2.3" fill="#fff" opacity="0.45"/></svg>
+  </div>
+</header>
+<nav><div class="wrap"><a href="#resumen">Resumen</a><a href="#precios">Precio por categoría</a><a href="#anual">Comparativo anual</a><a href="#heatmap">Mapa de calor</a><a href="#reproductoras">Reproductoras</a><a href="#produccion">Producción</a><a href="#comercio">Comercio exterior</a><a href="#pollohuevo">Pollo vs. huevo</a><a href="#sanidad">Sanidad</a><a href="#nota">Nota metodológica</a></div></nav>
+<div class="wrap">
+<section id="resumen">
+  <div class="kpis"><div class="kpi">
+      <div class="lbl">Pollo en granja · Jul 2026</div>
+      <div class="val">$27.28 <small>/kg</small></div>
+      <div class="delta dn">▼ 12.5% vs. mismo mes año anterior</div>
+      <div class="note">Precio pagado al productor</div>
+    </div><div class="kpi">
+      <div class="lbl">Pollo vivo en andén · Jul 2026</div>
+      <div class="val">$28.50 <small>/kg</small></div>
+      <div class="delta dn">▼ 17.8% vs. mismo mes año anterior</div>
+      <div class="note">Precio pagado al productor</div>
+    </div><div class="kpi">
+      <div class="lbl">Rosticero seco · Jul 2026</div>
+      <div class="val">$41.12 <small>/kg</small></div>
+      <div class="delta dn">▼ 20.2% vs. mismo mes año anterior</div>
+      <div class="note">Precio pagado al productor</div>
+    </div><div class="kpi">
+      <div class="lbl">Rosticero comercial · Jul 2026</div>
+      <div class="val">$36.69 <small>/kg</small></div>
+      <div class="delta dn">▼ 10.4% vs. mismo mes año anterior</div>
+      <div class="note">Precio pagado al productor</div>
+    </div></div>
+  <div class="lectura"><strong>Lectura ejecutiva.</strong> El pollo vivo en andén se ubicó en <strong>$28.50/kg</strong> (Jul 2026), una baja de <strong>17.8%</strong> frente al mismo mes del año anterior. La venta de reproductoras pesadas — indicador adelantado de la oferta futura de pollo — registró <strong>1.53 M cabezas</strong> en su último mes disponible, un alza de <strong>10.4%</strong> contra el mismo mes del año previo. En comercio exterior, la importación del último mes reportado fue de <strong>81,307 t</strong>, una baja de <strong>13.8%</strong> interanual.</div>
+</section>
+<section id="precios">
+  <div class="banda"><h2>Precio de pollo por categoría</h2><span class="num">Sección 01</span></div>
+  
+  <div class="card">
+      <h3>Serie mensual · pesos por kilogramo</h3>
+      <div class="desc">Las cuatro referencias de precio pagado al productor.</div>
+      <div class="chart tall"><canvas id="chPrecios"></canvas></div>
+      <div class="fuente">UNA · v_eslabones_pollo</div>
+    </div>
+<div class="grid g2"><div class="card">
+      <h3>Promedio móvil de 12 meses</h3>
+      <div class="desc">Suaviza la estacionalidad para mostrar la tendencia de fondo.</div>
+      <div class="chart "><canvas id="chPm12"></canvas></div>
+      <div class="fuente">UNA · cálculo propio</div>
+    </div><div class="card">
+      <h3>Variación interanual (%)</h3>
+      <div class="desc">Cambio contra el mismo mes del año anterior.</div>
+      <div class="chart "><canvas id="chYoy"></canvas></div>
+      <div class="fuente">UNA · cálculo propio</div>
+    </div></div>
+  
+  
+</section>
+<section id="anual">
+  <div class="banda"><h2>Comparativo por año calendario</h2><span class="num">Sección 02</span></div>
+  
+  <div class="card">
+      <h3>Pollo vivo en andén · enero a diciembre por año</h3>
+      <div class="desc">Una línea por año para comparar el ciclo estacional.</div>
+      <div class="chart tall"><canvas id="chAnual"></canvas></div>
+      <div class="fuente">UNA · v_eslabones_pollo</div>
+    </div>
+  
+  
+</section>
+<section id="heatmap">
+  <div class="banda"><h2>Mapa de calor: variación mensual del precio</h2><span class="num">Sección 03</span></div>
+  
+  <div class="grid g2"><div class="card">
+      <h3>Pollo en granja</h3>
+      <div class="desc">Cambio porcentual (%) contra el mes anterior.</div>
+      <div class="heat-wrap"><table class="heat-table">
+    <thead><tr><th class="yr-col"></th><th>Ene</th><th>Feb</th><th>Mar</th><th>Abr</th><th>May</th><th>Jun</th><th>Jul</th><th>Ago</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dic</th></tr></thead>
+    <tbody><tr><td class="yr">2022</td><td class="heat-cell empty">n/d</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+6.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.12);color:#1C1C1C">-0.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.18);color:#1C1C1C">+4.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+2.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.13);color:#1C1C1C">+0.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.49);color:#1C1C1C">-27.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.14);color:#1C1C1C">-1.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.25);color:#1C1C1C">+9.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.26);color:#1C1C1C">-10.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.13);color:#1C1C1C">+1.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.24);color:#1C1C1C">-9.0</td></tr><tr><td class="yr">2023</td><td class="heat-cell" style="background:rgba(46,139,87,0.50);color:#1C1C1C">+27.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.25);color:#1C1C1C">+9.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.25);color:#1C1C1C">-9.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.37);color:#1C1C1C">+17.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.27);color:#1C1C1C">-11.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.16);color:#1C1C1C">-3.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+4.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-5.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.37);color:#1C1C1C">-18.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.46);color:#1C1C1C">-24.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.29);color:#1C1C1C">+12.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.16);color:#1C1C1C">-3.1</td></tr><tr><td class="yr">2024</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+3.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+2.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.87);color:#fff">+54.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-5.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+5.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+4.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.21);color:#1C1C1C">-6.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.47);color:#1C1C1C">-25.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.26);color:#1C1C1C">-10.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-5.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.36);color:#1C1C1C">+17.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.38);color:#1C1C1C">+19.1</td></tr><tr><td class="yr">2025</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+3.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.16);color:#1C1C1C">-3.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.22);color:#1C1C1C">-7.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.26);color:#1C1C1C">+9.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.67);color:#fff">+39.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.32);color:#1C1C1C">-14.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.43);color:#1C1C1C">-22.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.52);color:#1C1C1C">-28.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.53);color:#1C1C1C">+29.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.34);color:#1C1C1C">-15.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.14);color:#1C1C1C">+1.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.28);color:#1C1C1C">-11.2</td></tr><tr><td class="yr">2026</td><td class="heat-cell" style="background:rgba(239,68,68,0.13);color:#1C1C1C">-0.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.27);color:#1C1C1C">+11.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.39);color:#1C1C1C">+19.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.54);color:#fff">-30.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.75);color:#fff">+45.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.39);color:#1C1C1C">-19.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.32);color:#1C1C1C">+14.5</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td></tr></tbody></table></div>
+      <div class="fuente">UNA · cálculo propio</div>
+    </div><div class="card">
+      <h3>Pollo vivo en andén</h3>
+      <div class="desc">Cambio porcentual (%) contra el mes anterior.</div>
+      <div class="heat-wrap"><table class="heat-table">
+    <thead><tr><th class="yr-col"></th><th>Ene</th><th>Feb</th><th>Mar</th><th>Abr</th><th>May</th><th>Jun</th><th>Jul</th><th>Ago</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dic</th></tr></thead>
+    <tbody><tr><td class="yr">2019</td><td class="heat-cell" style="background:rgba(239,68,68,0.15);color:#1C1C1C">-3.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-7.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+3.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.52);color:#1C1C1C">+41.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.21);color:#1C1C1C">+9.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.23);color:#1C1C1C">+11.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.17);color:#1C1C1C">-5.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.60);color:#fff">-49.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.42);color:#1C1C1C">+31.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.18);color:#1C1C1C">-6.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.23);color:#1C1C1C">+11.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.27);color:#1C1C1C">-15.2</td></tr><tr><td class="yr">2020</td><td class="heat-cell" style="background:rgba(239,68,68,0.32);color:#1C1C1C">-20.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.47);color:#1C1C1C">+36.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.31);color:#1C1C1C">+19.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.34);color:#1C1C1C">-22.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+7.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.66);color:#fff">+56.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.16);color:#1C1C1C">-4.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.22);color:#1C1C1C">-10.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+10.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.26);color:#1C1C1C">-14.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.29);color:#1C1C1C">+17.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.13);color:#1C1C1C">+1.0</td></tr><tr><td class="yr">2021</td><td class="heat-cell" style="background:rgba(46,139,87,0.28);color:#1C1C1C">+17.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+5.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-8.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.14);color:#1C1C1C">+2.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.13);color:#1C1C1C">+1.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.23);color:#1C1C1C">-11.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.18);color:#1C1C1C">+6.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.18);color:#1C1C1C">-6.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.28);color:#1C1C1C">-16.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.25);color:#1C1C1C">-13.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.54);color:#fff">+44.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.13);color:#1C1C1C">+1.4</td></tr><tr><td class="yr">2022</td><td class="heat-cell" style="background:rgba(46,139,87,0.25);color:#1C1C1C">+13.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.18);color:#1C1C1C">+6.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.12);color:#1C1C1C">+0.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+3.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+3.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.12);color:#1C1C1C">+0.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.37);color:#1C1C1C">-26.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.15);color:#1C1C1C">-3.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.21);color:#1C1C1C">+9.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.22);color:#1C1C1C">-9.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.13);color:#1C1C1C">+1.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.22);color:#1C1C1C">-10.2</td></tr><tr><td class="yr">2023</td><td class="heat-cell" style="background:rgba(46,139,87,0.41);color:#1C1C1C">+29.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+7.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-7.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.28);color:#1C1C1C">+17.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.22);color:#1C1C1C">-10.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.15);color:#1C1C1C">-3.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+4.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.17);color:#1C1C1C">-5.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.29);color:#1C1C1C">-17.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.35);color:#1C1C1C">-23.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+10.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+2.6</td></tr><tr><td class="yr">2024</td><td class="heat-cell" style="background:rgba(46,139,87,0.12);color:#1C1C1C">+0.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.15);color:#1C1C1C">-3.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.71);color:#fff">+61.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-7.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.26);color:#1C1C1C">+15.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.14);color:#1C1C1C">+2.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.21);color:#1C1C1C">-8.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.41);color:#1C1C1C">-29.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.18);color:#1C1C1C">-5.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.15);color:#1C1C1C">-3.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.29);color:#1C1C1C">+17.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.32);color:#1C1C1C">+20.5</td></tr><tr><td class="yr">2025</td><td class="heat-cell" style="background:rgba(46,139,87,0.14);color:#1C1C1C">+1.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.14);color:#1C1C1C">-1.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.18);color:#1C1C1C">-6.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+9.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.45);color:#1C1C1C">+33.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.22);color:#1C1C1C">-10.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.33);color:#1C1C1C">-21.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.39);color:#1C1C1C">-27.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.39);color:#1C1C1C">+27.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.30);color:#1C1C1C">-18.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.14);color:#1C1C1C">+1.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.22);color:#1C1C1C">-10.2</td></tr><tr><td class="yr">2026</td><td class="heat-cell" style="background:rgba(239,68,68,0.14);color:#1C1C1C">-1.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+10.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.33);color:#1C1C1C">+22.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.50);color:#1C1C1C">-39.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.87);color:#fff">+77.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.32);color:#1C1C1C">-21.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+5.5</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td></tr></tbody></table></div>
+      <div class="fuente">UNA · cálculo propio</div>
+    </div></div>
+<div class="grid g2"><div class="card">
+      <h3>Rosticero seco</h3>
+      <div class="desc">Cambio porcentual (%) contra el mes anterior.</div>
+      <div class="heat-wrap"><table class="heat-table">
+    <thead><tr><th class="yr-col"></th><th>Ene</th><th>Feb</th><th>Mar</th><th>Abr</th><th>May</th><th>Jun</th><th>Jul</th><th>Ago</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dic</th></tr></thead>
+    <tbody><tr><td class="yr">2019</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-5.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.15);color:#1C1C1C">-2.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.18);color:#1C1C1C">-4.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.39);color:#1C1C1C">+18.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.24);color:#1C1C1C">+8.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.28);color:#1C1C1C">+11.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.18);color:#1C1C1C">+4.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.48);color:#1C1C1C">-25.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.27);color:#1C1C1C">+10.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.26);color:#1C1C1C">-9.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.26);color:#1C1C1C">-9.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.18);color:#1C1C1C">-4.0</td></tr><tr><td class="yr">2020</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-5.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.18);color:#1C1C1C">+4.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.38);color:#1C1C1C">+18.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.38);color:#1C1C1C">-18.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.18);color:#1C1C1C">+4.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.68);color:#fff">+39.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-4.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.13);color:#1C1C1C">-0.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.24);color:#1C1C1C">+8.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.23);color:#1C1C1C">-7.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.21);color:#1C1C1C">+6.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+5.0</td></tr><tr><td class="yr">2021</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+5.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+3.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.16);color:#1C1C1C">-2.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.14);color:#1C1C1C">-1.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.14);color:#1C1C1C">-1.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.18);color:#1C1C1C">+4.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.23);color:#1C1C1C">+7.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.16);color:#1C1C1C">-2.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.21);color:#1C1C1C">-6.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-5.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.14);color:#1C1C1C">+1.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.14);color:#1C1C1C">+1.7</td></tr><tr><td class="yr">2022</td><td class="heat-cell" style="background:rgba(46,139,87,0.24);color:#1C1C1C">+8.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+2.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.27);color:#1C1C1C">+10.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+6.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+4.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.18);color:#1C1C1C">+4.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.32);color:#1C1C1C">-14.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-5.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.31);color:#1C1C1C">+13.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.23);color:#1C1C1C">-8.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.24);color:#1C1C1C">-8.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.22);color:#1C1C1C">-6.9</td></tr><tr><td class="yr">2023</td><td class="heat-cell" style="background:rgba(46,139,87,0.47);color:#1C1C1C">+24.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+7.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-5.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.30);color:#1C1C1C">+12.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.31);color:#1C1C1C">-13.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-4.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.23);color:#1C1C1C">+7.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+3.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.26);color:#1C1C1C">-9.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.49);color:#1C1C1C">-25.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.23);color:#1C1C1C">-7.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+1.8</td></tr><tr><td class="yr">2024</td><td class="heat-cell" style="background:rgba(46,139,87,0.33);color:#1C1C1C">+14.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+2.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.87);color:#fff">+52.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+2.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+3.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+2.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.23);color:#1C1C1C">-7.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.41);color:#1C1C1C">-20.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.36);color:#1C1C1C">-16.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+2.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.27);color:#1C1C1C">+10.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.39);color:#1C1C1C">+19.0</td></tr><tr><td class="yr">2025</td><td class="heat-cell" style="background:rgba(46,139,87,0.26);color:#1C1C1C">+10.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-4.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.17);color:#1C1C1C">-3.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+3.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.55);color:#fff">+30.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-4.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.42);color:#1C1C1C">-21.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.51);color:#1C1C1C">-26.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.44);color:#1C1C1C">+21.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.29);color:#1C1C1C">-11.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+1.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.35);color:#1C1C1C">-15.8</td></tr><tr><td class="yr">2026</td><td class="heat-cell" style="background:rgba(46,139,87,0.27);color:#1C1C1C">+10.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-5.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.42);color:#1C1C1C">+20.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.46);color:#1C1C1C">-23.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.67);color:#fff">+38.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.26);color:#1C1C1C">-9.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.14);color:#1C1C1C">-1.6</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td></tr></tbody></table></div>
+      <div class="fuente">UNA · cálculo propio</div>
+    </div><div class="card">
+      <h3>Rosticero comercial</h3>
+      <div class="desc">Cambio porcentual (%) contra el mes anterior.</div>
+      <div class="heat-wrap"><table class="heat-table">
+    <thead><tr><th class="yr-col"></th><th>Ene</th><th>Feb</th><th>Mar</th><th>Abr</th><th>May</th><th>Jun</th><th>Jul</th><th>Ago</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dic</th></tr></thead>
+    <tbody><tr><td class="yr">2019</td><td class="heat-cell" style="background:rgba(239,68,68,0.24);color:#1C1C1C">-5.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.23);color:#1C1C1C">-4.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.13);color:#1C1C1C">-0.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.28);color:#1C1C1C">+7.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.43);color:#1C1C1C">+13.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+2.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.27);color:#1C1C1C">+6.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.51);color:#1C1C1C">-17.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.30);color:#1C1C1C">-7.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.27);color:#1C1C1C">-6.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.32);color:#1C1C1C">+8.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.24);color:#1C1C1C">+5.1</td></tr><tr><td class="yr">2020</td><td class="heat-cell" style="background:rgba(239,68,68,0.37);color:#1C1C1C">-11.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.16);color:#1C1C1C">-1.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.42);color:#1C1C1C">+13.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.40);color:#1C1C1C">-12.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-3.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.87);color:#fff">+33.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.24);color:#1C1C1C">+5.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.18);color:#1C1C1C">-2.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.18);color:#1C1C1C">+2.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-3.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.28);color:#1C1C1C">+6.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.34);color:#1C1C1C">+9.8</td></tr><tr><td class="yr">2021</td><td class="heat-cell" style="background:rgba(239,68,68,0.12);color:#1C1C1C">-0.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.14);color:#1C1C1C">-0.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+1.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.25);color:#1C1C1C">+5.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+1.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.24);color:#1C1C1C">-5.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.18);color:#1C1C1C">-2.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.14);color:#1C1C1C">-1.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.26);color:#1C1C1C">-6.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.29);color:#1C1C1C">-7.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+4.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.24);color:#1C1C1C">+5.4</td></tr><tr><td class="yr">2022</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+1.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.45);color:#1C1C1C">+14.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+4.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+4.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+2.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.21);color:#1C1C1C">-4.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.29);color:#1C1C1C">-7.6</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+1.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.19);color:#1C1C1C">-3.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.14);color:#1C1C1C">-1.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.14);color:#1C1C1C">+0.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.14);color:#1C1C1C">-1.0</td></tr><tr><td class="yr">2023</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+2.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.29);color:#1C1C1C">+7.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.17);color:#1C1C1C">+2.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+2.9</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-3.5</td><td class="heat-cell" style="background:rgba(239,68,68,0.39);color:#1C1C1C">-11.9</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+4.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.15);color:#1C1C1C">-1.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.31);color:#1C1C1C">-8.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.37);color:#1C1C1C">-11.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.45);color:#1C1C1C">+14.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.14);color:#1C1C1C">+0.9</td></tr><tr><td class="yr">2024</td><td class="heat-cell" style="background:rgba(46,139,87,0.19);color:#1C1C1C">+3.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.26);color:#1C1C1C">-6.0</td><td class="heat-cell" style="background:rgba(46,139,87,0.41);color:#1C1C1C">+12.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+1.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.23);color:#1C1C1C">+4.7</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+1.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.23);color:#1C1C1C">-5.0</td><td class="heat-cell" style="background:rgba(239,68,68,0.21);color:#1C1C1C">-4.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.47);color:#1C1C1C">-15.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.20);color:#1C1C1C">-3.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.52);color:#1C1C1C">+17.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.54);color:#fff">+18.5</td></tr><tr><td class="yr">2025</td><td class="heat-cell" style="background:rgba(46,139,87,0.12);color:#1C1C1C">+0.1</td><td class="heat-cell" style="background:rgba(239,68,68,0.25);color:#1C1C1C">-5.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+1.8</td><td class="heat-cell" style="background:rgba(46,139,87,0.22);color:#1C1C1C">+4.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.42);color:#1C1C1C">+13.2</td><td class="heat-cell" style="background:rgba(239,68,68,0.41);color:#1C1C1C">-12.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.54);color:#fff">-18.7</td><td class="heat-cell" style="background:rgba(239,68,68,0.45);color:#1C1C1C">-14.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.41);color:#1C1C1C">+12.6</td><td class="heat-cell" style="background:rgba(239,68,68,0.29);color:#1C1C1C">-7.5</td><td class="heat-cell" style="background:rgba(46,139,87,0.31);color:#1C1C1C">+8.2</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+1.4</td></tr><tr><td class="yr">2026</td><td class="heat-cell" style="background:rgba(239,68,68,0.15);color:#1C1C1C">-1.4</td><td class="heat-cell" style="background:rgba(239,68,68,0.28);color:#1C1C1C">-7.1</td><td class="heat-cell" style="background:rgba(46,139,87,0.43);color:#1C1C1C">+13.8</td><td class="heat-cell" style="background:rgba(239,68,68,0.13);color:#1C1C1C">-0.4</td><td class="heat-cell" style="background:rgba(46,139,87,0.15);color:#1C1C1C">+1.3</td><td class="heat-cell" style="background:rgba(239,68,68,0.44);color:#1C1C1C">-14.3</td><td class="heat-cell" style="background:rgba(46,139,87,0.16);color:#1C1C1C">+1.5</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td><td class="heat-cell empty">n/d</td></tr></tbody></table></div>
+      <div class="fuente">UNA · cálculo propio</div>
+    </div></div>
+  
+  
+</section>
+<section id="reproductoras">
+  <div class="banda"><h2>Venta de reproductoras pesadas</h2><span class="num">Sección 04</span></div>
+  
+  <div class="card">
+      <h3>Reproductoras pesadas · cabezas por mes</h3>
+      <div class="desc">Venta mensual y su promedio móvil de 12 meses.</div>
+      <div class="chart tall"><canvas id="chReproductoras"></canvas></div>
+      <div class="fuente">UNA · tabla reproductoras</div>
+    </div>
+<div class="card">
+      <h3>Comparativo por año calendario</h3>
+      <div class="desc">Venta mensual de reproductoras de los últimos años.</div>
+      <div class="chart "><canvas id="chRepAnual"></canvas></div>
+      <div class="fuente">UNA · tabla reproductoras</div>
+    </div>
+  
+  
+</section>
+<section id="produccion">
+  <div class="banda"><h2>Producción de pollo</h2><span class="num">Sección 05</span></div>
+  
+  <div class="card">
+      <h3>Producción de carne y consumo per cápita</h3>
+      <div class="desc">Producción anual de carne de pollo (barras, eje izquierdo) contra el consumo per cápita en kilogramos por habitante (línea, eje derecho).</div>
+      <div class="chart tall"><canvas id="chProduccion"></canvas></div>
+      <div class="fuente">UNA · tabla Production</div>
+    </div>
+  
+  <div class="aviso"><strong>Alcance de esta sección.</strong> La producción se presenta con periodicidad anual, que es la granularidad con la que está disponible esta serie.</div>
+</section>
+<section id="comercio">
+  <div class="banda"><h2>Comercio exterior</h2><span class="num">Sección 06</span></div>
+  
+  <div class="card">
+      <h3>Importación de pollo</h3>
+      <div class="desc">Volumen mensual importado en toneladas (barras, eje izquierdo) y precio implícito por kilogramo en dólares (línea, eje derecho). Suma toda la carne de pollo, incluida la carne mecánicamente deshuesada, que por sí sola representa cerca de un tercio del volumen. Quedan fuera las aves vivas, que son material genético para producción y no carne de consumo.</div>
+      <div class="chart tall"><canvas id="chTrade"></canvas></div>
+      <div class="fuente">Pedimentos · categoría Pollo</div>
+    </div>
+<div class="grid g2"><div class="card">
+      <h3>Exportación de pollo</h3>
+      <div class="desc">Volumen mensual exportado, en su propia escala: equivale a 0.3% del volumen importado, de modo que en una escala compartida con la importación no sería visible.</div>
+      <div class="chart "><canvas id="chExport"></canvas></div>
+      <div class="fuente">Pedimentos · categoría Pollo</div>
+    </div><div class="card">
+      <h3>Principales países de origen</h3>
+      <div class="desc">Volumen importado por país proveedor. Elige el año con los botones de arriba para comparar cómo cambia la composición del abasto.</div>
+      <div class="ctrl" id="ctrlPais"><span class="lblc">Año</span></div>
+      <div class="chart "><canvas id="chPais"></canvas></div>
+      <div class="fuente">Pedimentos · país de origen</div>
+    </div></div>
+<div class="card">
+      <h3>Volumen mensual importado por corte y origen</h3>
+      <div class="desc">Toneladas importadas mes a mes desde Estados Unidos, Brasil y Chile. Elige el corte con los botones de arriba. No todos los orígenes envían todos los cortes: cuando un país no aparece en la gráfica es porque no registró importaciones de ese corte en el periodo.</div>
+      <div class="ctrl" id="ctrlDetVolumen"><span class="lblc">Corte</span></div>
+      <div class="chart tall"><canvas id="chDetVolumen"></canvas></div>
+      <div class="fuente">Pedimentos · producto y país de origen</div>
+    </div>
+<div class="card">
+      <h3>Precio mensual de importación por corte y origen</h3>
+      <div class="desc">Precio implícito por kilogramo pagado a cada origen, mes a mes. Permite comparar a qué precio compra México el mismo corte según el proveedor. Se omiten los meses con un volumen marginal: cuando un origen envía apenas unos kilos, los costos fijos del embarque inflan el precio por kilogramo y no reflejan el mercado.</div>
+      <div class="ctrl" id="ctrlDetPrecio"><span class="lblc">Corte</span></div>
+      <div class="chart tall"><canvas id="chDetPrecio"></canvas></div>
+      <div class="fuente">Pedimentos · valor entre volumen</div>
+    </div>
+  
+  <div class="aviso"><strong>Sobre la exportación.</strong> El pollo que sale del país se elabora con materia prima importada: no se trata de pollo de producción nacional. Por eso la exportación debe leerse como reexportación de producto transformado, y no como excedente de la producción mexicana.</div><div class="aviso"><strong>Qué incluye este detalle.</strong> Se analizan los cortes destinados al consumo. Quedan fuera dos partidas que no son comparables con ellos: la carne mecánicamente deshuesada (CMD de pollo), que es un insumo industrial, y las aves vivas de hasta tres días, que se comercian por cabeza y pesan muy poco, por lo que su precio por kilogramo no es equiparable.</div>
+</section>
+<section id="pollohuevo">
+  <div class="banda"><h2>Referencia: pollo vs. huevo</h2><span class="num">Sección 07</span></div>
+  
+  <div class="card">
+      <h3>Ambas series en pesos por kilogramo</h3>
+      <div class="desc">Comparación de referencia entre el precio del pollo vivo en andén y el del huevo blanco al productor. Son mercados distintos: la comparación es descriptiva, no implica causalidad.</div>
+      <div class="chart tall"><canvas id="chPolloHuevo"></canvas></div>
+      <div class="fuente">UNA · precios al productor</div>
+    </div>
+  
+  
+</section>
+<section id="sanidad">
+  <div class="banda"><h2>Sanidad: focos en el continente americano</h2><span class="num">Sección 08</span></div>
+  <div class="kpis"><div class="kpi">
+      <div class="lbl">Focos nuevos · últimos 30 días</div>
+      <div class="val">14 <small>focos</small></div>
+      
+      <div class="note">Foco más reciente: 2026-09-26</div>
+    </div><div class="kpi">
+      <div class="lbl">Países afectados · últimos 30 días</div>
+      <div class="val">6 <small>países</small></div>
+      
+      <div class="note">Continente americano</div>
+    </div><div class="kpi">
+      <div class="lbl">Focos abiertos</div>
+      <div class="val">136 <small>focos</small></div>
+      
+      <div class="note">Sin fecha de cierre notificada</div>
+    </div><div class="kpi">
+      <div class="lbl">Aves perdidas · últimos 30 días</div>
+      <div class="val">283.4 mil <small>aves</small></div>
+      
+      <div class="note">Muertas más sacrificadas</div>
+    </div></div>
+  <div class="card">
+      <h3>Focos notificados por mes y país</h3>
+      <div class="desc">Número de focos con fecha de inicio en cada mes, apilados por país. Un registro de la WOAH puede agrupar varios focos; aquí se cuentan los focos, no los registros.</div>
+      <div class="chart tall"><canvas id="chFocosMes"></canvas></div>
+      <div class="fuente">WOAH · WAHIS</div>
+    </div>
+<div class="grid g2"><div class="card">
+      <h3>Focos por tipo de unidad afectada</h3>
+      <div class="desc">Un foco en aves de producción puede cerrar mercados; uno de traspatio o de fauna silvestre indica presión del virus en el entorno, sin el mismo efecto comercial.</div>
+      <div class="chart short"><canvas id="chTipoUnidad"></canvas></div>
+      <div class="fuente">WOAH · WAHIS</div>
+    </div><div class="card">
+      <h3>Aves perdidas por tipo de unidad</h3>
+      <div class="desc">Muertas más sacrificadas, según el tipo de unidad donde ocurrió el foco.</div>
+      <div class="chart short"><canvas id="chAvesTipo"></canvas></div>
+      <div class="fuente">WOAH · WAHIS</div>
+    </div></div>
+<div class="card">
+      <h3>Focos más recientes · últimos 30 días</h3>
+      <div class="desc">Detalle de cada foco notificado en el continente durante el último mes.</div>
+      <div class="tabla-wrap"><table class="datos"><thead><tr><th>Inicio</th><th>País</th><th>Ubicación</th><th>Unidad</th><th>Especies</th><th>Susceptibles</th><th>Casos</th><th>Muertes</th></tr></thead><tbody><tr><td class="">2026-09-26</td><td class="">Chile</td><td class="">Tolten, Araucanía</td><td class="">Backyard</td><td class="">Birds</td><td class="n">25</td><td class="n">25</td><td class="n">0</td></tr><tr><td class="">2026-09-20</td><td class="">Canada</td><td class="">Rhineland, Manitoba</td><td class="">Farm</td><td class="">Birds</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-19</td><td class="">Canada</td><td class="">Cartier, Manitoba</td><td class="">Farm</td><td class="">Birds</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-18</td><td class="">Canada</td><td class="">Rockwood, Manitoba</td><td class="">Farm</td><td class="">Birds</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-14</td><td class="">Argentina</td><td class="">EZEIZA, BUENOS AIRES</td><td class="">Backyard</td><td class="">Birds</td><td class="n">—</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-14</td><td class="">United States of America</td><td class="">Kandiyohi, Minnesota</td><td class="">Farm</td><td class="">Birds</td><td class="n">61,111</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-13</td><td class="">United States of America</td><td class="">Ravalli, Montana</td><td class="">Backyard</td><td class="">Birds</td><td class="n">122</td><td class="n">—</td><td class="n">89</td></tr><tr><td class="">2026-09-13</td><td class="">United States of America</td><td class="">Big Stone, Minnesota</td><td class="">Farm</td><td class="">Birds</td><td class="n">55,318</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-11</td><td class="">United States of America</td><td class="">Barron, Wisconsin</td><td class="">Farm</td><td class="">Birds</td><td class="n">79,088</td><td class="n">—</td><td class="n">—</td></tr><tr><td class="">2026-09-09</td><td class="">Peru</td><td class="">Nuevo Chimbote, Ancash</td><td class="">Backyard</td><td class="">Birds</td><td class="n">13</td><td class="n">—</td><td class="n">9</td></tr><tr><td class="">2026-09-09</td><td class="">Suriname</td><td class="">Welgelegen, Paramaribo</td><td class="">Farm</td><td class="">Birds</td><td class="n">6,000</td><td class="n">5,500</td><td class="n">5,500</td></tr><tr><td class="">2026-09-09</td><td class="">Canada</td><td class="">De Salaberry, Manitoba</td><td class="">Farm</td><td class="">Birds</td><td class="n">19,400</td><td class="n">4,700</td><td class="n">4,700</td></tr><tr><td class="">2026-09-08</td><td class="">United States of America</td><td class="">Becker, Minnesota</td><td class="">Farm</td><td class="">Birds</td><td class="n">44,352</td><td class="n">—</td><td class="n">6</td></tr><tr><td class="">2026-09-08</td><td class="">United States of America</td><td class="">Otter Tail, Minnesota</td><td class="">Farm</td><td class="">Birds</td><td class="n">18,000</td><td class="n">—</td><td class="n">—</td></tr></tbody></table></div>
+      <div class="fuente">WOAH · WAHIS</div>
+    </div>
+  
+  <div class="aviso"><strong>Cómo leer esta sección.</strong> Cada foco se ubica por sus coordenadas: se incluyen los que caen entre las longitudes 170° O y 30° O. Las cifras de susceptibles, casos y muertes corresponden a cada foco, no al evento completo del país, y una celda vacía significa que la notificación todavía no reporta esa cantidad. En el continente, buena parte de los avisos registran la especie como la categoría genérica &quot;Birds&quot;, por lo que el tipo de unidad afectada resulta más informativo que el nombre de la especie.</div>
+</section>
+
+<div class="metodo" id="nota">
+  <h3>Nota metodológica y alcance</h3>
+  <p><span class="badge-r">Origen de los datos</span>&nbsp; Todas las cifras provienen de la base de datos institucional y se consultan en el momento de generar el reporte. Los indicadores derivados —promedios y sumas móviles, variación interanual, correlaciones y conversiones de unidad— se calculan en el servidor, de modo que cualquier sistema que consuma el mismo servicio obtiene exactamente estas cifras.</p>
+  <p><span class="badge-r">Ventanas móviles</span>&nbsp; Las ventanas de 12 meses se alinean al último dato disponible, no al año calendario, para que los cortes de calendario no se lean como tendencia.</p>
+  <p><span class="badge-r">Comercio exterior</span>&nbsp; Las cifras salen de los pedimentos aduanales. Se omite el precio implícito de los meses con volumen marginal, donde los costos fijos del embarque distorsionan el valor por kilogramo.</p>
+  <p><span class="badge-r">Revisiones</span>&nbsp; Las cifras más recientes pueden ser preliminares y ajustarse en cargas posteriores.</p>
+  <p><span class="badge-r">Generado</span>&nbsp; 8 de octubre de 2026 a las 9:36 a.m.</p>
+</div>
+<div class="cofece">
+  <h4>Declaracion antimonopolio</h4>
+  <p>Este documento tiene fines exclusivamente informativos y estadisticos. La informacion es historica y agregada; no constituye una recomendacion de precios ni un acuerdo entre competidores. Cada participante determina su conducta comercial de forma independiente.</p>
+</div>
+</div>
+<footer><div class="wrap">
+  <span>Union Nacional de Avicultores &middot; Reporte generado automaticamente</span>
+  <span>Datos en vivo desde la base de datos institucional</span>
+</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const DATOS = {"chPrecios":{"labels":["Ene 00","Feb 00","Mar 00","Abr 00","May 00","Jun 00","Jul 00","Ago 00","Sep 00","Oct 00","Nov 00","Dic 00","Ene 01","Feb 01","Mar 01","Abr 01","May 01","Jun 01","Jul 01","Ago 01","Sep 01","Oct 01","Nov 01","Dic 01","Ene 02","Feb 02","Mar 02","Abr 02","May 02","Jun 02","Jul 02","Ago 02","Sep 02","Oct 02","Nov 02","Dic 02","Ene 03","Feb 03","Mar 03","Abr 03","May 03","Jun 03","Jul 03","Ago 03","Sep 03","Oct 03","Nov 03","Dic 03","Ene 04","Feb 04","Mar 04","Abr 04","May 04","Jun 04","Jul 04","Ago 04","Sep 04","Oct 04","Nov 04","Dic 04","Ene 05","Feb 05","Mar 05","Abr 05","May 05","Jun 05","Jul 05","Ago 05","Sep 05","Oct 05","Nov 05","Dic 05","Ene 06","Feb 06","Mar 06","Abr 06","May 06","Jun 06","Jul 06","Ago 06","Sep 06","Oct 06","Nov 06","Dic 06","Ene 07","Feb 07","Mar 07","Abr 07","May 07","Jun 07","Jul 07","Ago 07","Sep 07","Oct 07","Nov 07","Dic 07","Ene 08","Feb 08","Mar 08","Abr 08","May 08","Jun 08","Jul 08","Ago 08","Sep 08","Oct 08","Nov 08","Dic 08","Ene 09","Feb 09","Mar 09","Abr 09","May 09","Jun 09","Jul 09","Ago 09","Sep 09","Oct 09","Nov 09","Dic 09","Ene 10","Feb 10","Mar 10","Abr 10","May 10","Jun 10","Jul 10","Ago 10","Sep 10","Oct 10","Nov 10","Dic 10","Ene 11","Feb 11","Mar 11","Abr 11","May 11","Jun 11","Jul 11","Ago 11","Sep 11","Oct 11","Nov 11","Dic 11","Ene 12","Feb 12","Mar 12","Abr 12","May 12","Jun 12","Jul 12","Ago 12","Sep 12","Oct 12","Nov 12","Dic 12","Ene 13","Feb 13","Mar 13","Abr 13","May 13","Jun 13","Jul 13","Ago 13","Sep 13","Oct 13","Nov 13","Dic 13","Ene 14","Feb 14","Mar 14","Abr 14","May 14","Jun 14","Jul 14","Ago 14","Sep 14","Oct 14","Nov 14","Dic 14","Ene 15","Feb 15","Mar 15","Abr 15","May 15","Jun 15","Jul 15","Ago 15","Sep 15","Oct 15","Nov 15","Dic 15","Ene 16","Feb 16","Mar 16","Abr 16","May 16","Jun 16","Jul 16","Ago 16","Sep 16","Oct 16","Nov 16","Dic 16","Ene 17","Feb 17","Mar 17","Abr 17","May 17","Jun 17","Jul 17","Ago 17","Sep 17","Oct 17","Nov 17","Dic 17","Ene 18","Feb 18","Mar 18","Abr 18","May 18","Jun 18","Jul 18","Ago 18","Sep 18","Oct 18","Nov 18","Dic 18","Ene 19","Feb 19","Mar 19","Abr 19","May 19","Jun 19","Jul 19","Ago 19","Sep 19","Oct 19","Nov 19","Dic 19","Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26"],"Granja":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,36.36,38.86,38.84,40.55,41.69,41.93,30.61,30.14,33.06,29.62,29.93,27.24,34.79,38.16,34.68,40.85,36.27,35.16,36.84,34.85,28.49,21.39,24.07,23.33,24.18,24.69,38.09,35.95,37.76,39.6,36.95,27.6,24.71,23.36,27.49,32.74,33.76,32.72,30.43,33.42,46.67,40.01,31.17,22.2,28.73,24.23,24.64,21.87,21.78,24.18,28.97,20.21,29.49,23.83,27.28],"Andén/Pie":[11.7386,13.029,12.5364,11.0139,13.545,13.8427,11.0457,7.1339,7.8576,7.3433,9.2825,11.0032,8.2577,9.4016,10.1086,12.17,13.5773,9.7762,9.3545,8.687,11.008,9.3778,8.7425,10.1205,9.1209,10.2021,10.0822,12.43,13.3605,12.264,11.8713,11.0818,10.4365,9.7317,9.555,10.629,13.1995,13.5,12.2575,10.138,14.0024,12.7057,10.3265,8.5624,8.6971,8.3657,9.6574,10.5595,11.3162,12.3763,12.6996,11.795,12,14.7932,15.0355,13.8136,10.8105,9.9438,11.6495,14.673,14.2448,13.5035,11.9105,13.0038,16.1832,16.5795,17.6176,14.0574,7.8143,7.0529,7.963,11.5641,11.5909,14.4505,13.0014,10.385,15.5118,10.9,10.21,10.5578,12.5767,12.9109,12.113,13.85,12.1659,11.8942,10.3948,15.1805,16.4005,15.7876,16.4482,14.9805,11.8585,9.5791,11.246,13.8925,14.38,13.47,14.62,15.81,18.08,13.54,11.06,10,13.58,14.86,14.99,16.82,19.41,19.76,19.1,17.65,19.31,17.84,15.32,12.97,14.36,12.29,12.58,14.79,15.86,16.22,16.17,16.77,18.73,17.84,18.9,18.87,17.73,17.19,14.78,16.88,18.9576,16.0274,14.6123,16.5663,18.3536,20.0782,19.669,15.4639,15.181,15.101,16.7,19.3214,21.2429,20.8374,17.3368,17.6021,18.7532,19.8981,20.8682,19.0617,23.0265,21.3279,20.0536,20.025,22.75,21.62,23.66,25.72,28.32,25.29,19.05,16.57,15.63,14.25,17.75,20.31,22.12,21.74,20.74,23.84,29.88,16.25,20.57,24.87,23.9019,16.0183,18.07,20.895,24.22,19.17,20.99,24.09,20.46,20.84,22.52,16.84,17.92,14.45,19.18,18.52,18.24,16.99,21.19,26.58,27.64,24.14,21.05,19.34,23.71,20.78,24.37,21.8514,20.31,20.04,24.53,27.43,28.33,28.06,24.42,20.74,17.64,15.44,21.38,19.6785,24.5555,26.76,27.55,24.64,30.94,26.96,17.62,18.14,19.1,19.67,23.46,21.221,20.52,18.92,19.61,27.77,30.38,33.8,31.92,16.1,21.17,19.85,22.12,18.7581,14.91,20.31,24.31,18.84,20.16,31.44,30.09,26.86,29.64,25.41,29.81,30.1227,35.27,37.27,33.99,34.72,35.13,31.04,33.13,30.98,25.73,22.18,31.94,32.3878,36.88,39.34,39.52,41.04,42.4,42.42,31.41,30.46,33.45,30.15,30.57,27.4623,35.58,38.24,35.23,41.21,36.89,35.64,37.4,35.3772,29.23,22.31,24.64,25.29,25.4,24.65,39.8,37,42.54,43.51,39.67,27.88,26.27,25.36,29.71,35.79,36.45,35.82,33.58,36.91,49.44,44.12,34.69,25.11,32.07,26.2,26.63,23.91,23.5,26,31.79,19.24,34.19,27.01,28.5],"Mercado Público":[12.8362,14.0295,14.135,13.8606,14.3005,14.39,13.8129,10.413,10.3452,9.1119,10.8625,12.9989,11.1073,11.3868,12.5357,14.0316,14.9045,12.881,11.05,10.6304,12.1025,11.7674,10.32,11.62,10.0086,11.4216,12.0689,13.5136,14.1491,13.712,13.5165,13.175,12.6435,12.083,12.473,12.9595,13.7655,13.8826,13.9805,13.804,15.051,14.67,13.4287,11.3681,10.2657,10.2313,10.5374,11.3818,12.5076,13.8589,13.9296,13.1345,12.8552,14.9941,15.3359,14.0264,12.0914,11.3252,12.5895,15.4622,15.9576,16.5695,15.3425,15.0852,17.0027,18.1718,18.5324,17.1313,12.1505,9.1629,9.685,11.0818,11.3591,14.63,14.4323,13.7556,16.1645,14.2527,12.6167,11.8122,13.9848,15.0268,15.074,15.65,15.7455,15.2947,14.0714,17.1553,19.7464,20,19.9636,18.6636,16.7285,14.3061,15.101,15.8485,17.02,16.58,17.9,18.73,20.25,18.42,16.12,14.41,15.1,17.61,17.85,19.66,22.14,22.65,23.2,22.91,22.71,22.23,20.27,18.42,17.4,15.89,16.28,17.74,19.32,20.1,20.53,20.44,21.44,21.62,21.41,22.16,22.27,22,20.72,20.46,21.7829,20.6137,19.0977,19.4579,21.3386,22.6377,23.62,20.3591,19.8643,18.8771,20.9545,24.0455,25.54,26.5,23.45,21.2463,23.0518,23.6805,26.1195,24.567,27.148,26.6287,25.9877,26.21,27.93,28.77,29.69,30.93,33.31,33.12,25.7363,21.46,22.5,19.54,21.71,25.89,27.64,27.61,26.9,29.62,36.59,25.81,24.53,30.98,30.53,24.0922,24.63,28.5041,32.11,28.06,26.98,32.46,28.26,29.47,30.28,25.49,25.36,20.64,28.47,27.77,27.24,27.18,28.68,33.62,35.65,31.73,26.38,26.65,31.03,30,30.3,28.9882,27.76,27.15,30.64,35.28,35.94,35.82,31.91,28.01,27.4,23.51,28.62,28.292,31.2382,33.97,36.01,34.63,38.64,33.99,23.32,23.49,22.64,21.23,25.28,29.4453,27.93,27.31,26.14,30.97,33.45,37.25,38.74,29,32.01,28.87,26.13,25.0962,23.73,24.75,29.22,23.92,24.99,34.75,33.06,32.84,35.6,32.87,34.97,36.7014,38.57,39.92,38.85,38.19,37.63,39.32,42.3,41.07,38.53,36.27,36.72,37.3535,40.41,41.45,45.66,48.68,50.99,53.28,45.76,43.25,48.9,45.01,41.21,38.3618,47.69,51.03,48.12,54.19,46.88,44.64,48.13,49.6013,44.83,33.43,30.95,31.51,36.19,36.98,56.23,57.55,59.71,61.41,56.64,45.14,37.73,38.55,42.48,50.55,55.58,52.84,51.09,52.69,68.56,65.18,51.51,37.64,45.88,40.41,41.17,34.65,38.32,36.37,43.89,33.44,46.28,41.8,41.12],"Rosticero":[14.469,15.141,14.58,16.0689,17.2973,16.6,16.2005,13.2483,12.3114,10.0876,11.157,14.6195,12.3909,11.1789,13.1881,15.9684,16.4091,14.2467,13.3623,13.1974,13.379,14.1087,14.943,15.225,15.1864,13.4105,12.6056,16.0318,16.0636,14.501,15.3826,15.7705,14.7475,14.8087,15.16,17.0714,14.9727,14.7384,15.4765,15.3546,17.9986,15.3781,14.1817,12.6429,12.5375,null,13.5,null,15.3571,16.2137,15.637,16.9795,17.3276,17.7082,16.6736,15.835,14.6743,13.149,15.11,18.9087,17.2643,15.4425,16.488,16.0738,18.685,20.4541,20.2471,17.9313,12.6262,10.2671,10.315,13.6659,12.4768,16.0889,14.7032,14.9339,17.2777,14.0836,13.9633,13.4978,15.7705,15.725,16.514,19.1816,15.9364,16.2763,15.369,20.0368,21.9909,19.8095,19.6705,19.29,17.078,15.5687,16.038,17.876,17.37,16.23,18.53,19.79,20.44,18.31,17.98,17.03,15.87,16.77,19.08,22.59,23.94,24.62,24.5,24.56,25.15,24.13,21.92,20.64,19.2,17.08,17.83,20.84,20.63,20.46,21.56,22.27,22.63,22.46,22,22.5,23.06,22.78,22.35,22.72,22.4214,21.4563,20.8495,20.9916,23.2677,23.5982,23.9114,22.5391,21.2948,19.0824,22.786,25.5723,25.5029,26.5411,23.6791,21.2463,23.0518,23.6805,26.1195,24.567,27.148,26.6287,25.9877,26.2083,27.02,26.39,29.79,31.93,34.04,33.47,28.0357,24.51,23.09,21.03,22.02,25.92,28.07,26.17,26.44,28.86,34.86,26.79,25.35,29.99,28.8824,23.2961,25.18,29.4018,29.98,26.44,28.86,33.05,29.65,28.67,27.43,24.92,24.15,21.03,25.48,27.51,27.03,25.21,28.25,31.9,31.06,28.31,25.88,27.61,28.73,27.43,29.4,30.8886,28.93,27.19,29.1,34.72,36.94,33.65,30.36,30.42,28.34,26.41,28.27,30.042,30.4036,30.03,33.28,36.39,35.16,29.3,27.32,26.06,25.95,24.26,30.03,32.3158,30.67,29.22,29.04,31.07,35.35,36.16,38.57,31.94,29.42,27.43,29.81,31.3335,27.88,27.35,30.93,27.09,26.11,34.74,36.54,35.64,36.53,35.34,37.77,41.4784,41.47,41.09,41.79,44.15,44.76,42.3,41.23,40.82,38.24,35.33,36.95,38.9389,39.66,45.42,47.34,49.52,50.61,48.51,44.81,45.46,44.02,43.59,43.99,43.5533,44.48,47.72,48.87,50.28,48.51,42.74,44.62,44.0815,40.44,35.92,41.21,41.58,42.83,40.24,45.41,46.02,48.17,48.98,46.54,44.62,37.67,36.37,42.84,50.78,50.85,47.91,48.76,50.95,57.68,50.35,40.94,35.06,39.47,36.52,39.5,40.04,39.49,36.69,41.77,41.62,42.15,36.13,36.69]},"chPm12":{"labels":["Ene 00","Feb 00","Mar 00","Abr 00","May 00","Jun 00","Jul 00","Ago 00","Sep 00","Oct 00","Nov 00","Dic 00","Ene 01","Feb 01","Mar 01","Abr 01","May 01","Jun 01","Jul 01","Ago 01","Sep 01","Oct 01","Nov 01","Dic 01","Ene 02","Feb 02","Mar 02","Abr 02","May 02","Jun 02","Jul 02","Ago 02","Sep 02","Oct 02","Nov 02","Dic 02","Ene 03","Feb 03","Mar 03","Abr 03","May 03","Jun 03","Jul 03","Ago 03","Sep 03","Oct 03","Nov 03","Dic 03","Ene 04","Feb 04","Mar 04","Abr 04","May 04","Jun 04","Jul 04","Ago 04","Sep 04","Oct 04","Nov 04","Dic 04","Ene 05","Feb 05","Mar 05","Abr 05","May 05","Jun 05","Jul 05","Ago 05","Sep 05","Oct 05","Nov 05","Dic 05","Ene 06","Feb 06","Mar 06","Abr 06","May 06","Jun 06","Jul 06","Ago 06","Sep 06","Oct 06","Nov 06","Dic 06","Ene 07","Feb 07","Mar 07","Abr 07","May 07","Jun 07","Jul 07","Ago 07","Sep 07","Oct 07","Nov 07","Dic 07","Ene 08","Feb 08","Mar 08","Abr 08","May 08","Jun 08","Jul 08","Ago 08","Sep 08","Oct 08","Nov 08","Dic 08","Ene 09","Feb 09","Mar 09","Abr 09","May 09","Jun 09","Jul 09","Ago 09","Sep 09","Oct 09","Nov 09","Dic 09","Ene 10","Feb 10","Mar 10","Abr 10","May 10","Jun 10","Jul 10","Ago 10","Sep 10","Oct 10","Nov 10","Dic 10","Ene 11","Feb 11","Mar 11","Abr 11","May 11","Jun 11","Jul 11","Ago 11","Sep 11","Oct 11","Nov 11","Dic 11","Ene 12","Feb 12","Mar 12","Abr 12","May 12","Jun 12","Jul 12","Ago 12","Sep 12","Oct 12","Nov 12","Dic 12","Ene 13","Feb 13","Mar 13","Abr 13","May 13","Jun 13","Jul 13","Ago 13","Sep 13","Oct 13","Nov 13","Dic 13","Ene 14","Feb 14","Mar 14","Abr 14","May 14","Jun 14","Jul 14","Ago 14","Sep 14","Oct 14","Nov 14","Dic 14","Ene 15","Feb 15","Mar 15","Abr 15","May 15","Jun 15","Jul 15","Ago 15","Sep 15","Oct 15","Nov 15","Dic 15","Ene 16","Feb 16","Mar 16","Abr 16","May 16","Jun 16","Jul 16","Ago 16","Sep 16","Oct 16","Nov 16","Dic 16","Ene 17","Feb 17","Mar 17","Abr 17","May 17","Jun 17","Jul 17","Ago 17","Sep 17","Oct 17","Nov 17","Dic 17","Ene 18","Feb 18","Mar 18","Abr 18","May 18","Jun 18","Jul 18","Ago 18","Sep 18","Oct 18","Nov 18","Dic 18","Ene 19","Feb 19","Mar 19","Abr 19","May 19","Jun 19","Jul 19","Ago 19","Sep 19","Oct 19","Nov 19","Dic 19","Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26"],"Granja":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,36.166000000000004,35.59909090909091,34.9025,34.77166666666667,34.71333333333334,34.36666666666667,34.39166666666667,33.940000000000005,33.37583333333333,33.895,34.2875,33.906666666666666,33.22083333333334,32.7325,32.406666666666666,31.522499999999997,30.400000000000002,30.68416666666667,30.275833333333335,30.400000000000002,30.77,30.77916666666667,30.175,29.86,30.02416666666667,30.30916666666667,31.093333333333337,31.89166666666667,32.560833333333335,31.9225,31.711666666666673,32.45416666666667,32.48833333333334,32.00666666666667,31.55666666666667,31.89166666666667,31.96416666666667,31.72666666666667,30.820833333333336,29.8225,29.110833333333332,28.98916666666666,27.888333333333325,26.456666666666667,25.108333333333334,24.784166666666664],"Andén/Pie":[null,null,null,null,null,null,null,null,null,null,null,10.780983333333333,10.490908333333335,10.188625,9.986308333333334,10.08265,10.085341666666666,9.746466666666665,9.605533333333334,9.734958333333333,9.997491666666667,10.167033333333334,10.122033333333334,10.048474999999998,10.120408333333332,10.187116666666666,10.184916666666666,10.206583333333334,10.188516666666667,10.395833333333334,10.605566666666666,10.805133333333332,10.757508333333334,10.786999999999999,10.854708333333333,10.897083333333333,11.23696666666667,11.511791666666667,11.693066666666667,11.50206666666667,11.555558333333336,11.592366666666669,11.463633333333334,11.253683333333335,11.108733333333333,10.9949,11.003433333333334,10.997641666666667,10.8407,10.747058333333333,10.783900000000001,10.921983333333332,10.755116666666666,10.929075000000003,11.321491666666669,11.759091666666668,11.935208333333334,12.066716666666666,12.232725,12.575516666666665,12.819566666666667,12.9135,12.84774166666667,12.948475000000002,13.297075000000001,13.445933333333334,13.661108333333333,13.681425000000003,13.431741666666667,13.190833333333332,12.883624999999997,12.62455,12.403391666666666,12.48230833333333,12.573216666666665,12.354983333333331,12.299033333333334,11.825741666666667,11.208441666666667,10.916808333333336,11.313675000000002,11.801841666666668,12.147675,12.338166666666666,12.386083333333332,12.173058333333335,11.955841666666666,12.355466666666665,12.429525,12.836825,13.356675000000001,13.725233333333335,13.665383333333333,13.387733333333331,13.315483333333335,13.319025000000002,13.503533333333332,13.63485,13.98695,14.039408333333334,14.179366666666667,13.992066666666666,13.543050000000001,13.128008333333334,13.271466666666669,13.711541666666667,14.023541666666668,14.2675,14.686666666666666,15.210833333333332,15.584166666666667,15.737499999999999,15.839999999999998,16.198333333333334,16.553333333333335,16.800833333333333,16.86583333333333,16.651666666666667,16.450833333333335,16.28166666666667,15.985833333333332,15.690833333333332,15.446666666666667,15.373333333333333,15.325000000000003,15.325000000000001,15.623333333333333,16.115,16.395833333333332,16.804166666666667,16.9875,17.161666666666665,17.4198,17.403750000000002,17.27394166666667,17.25696666666667,17.225600000000004,17.412116666666666,17.476200000000002,17.192358333333335,16.97994166666667,16.805858333333337,16.965858333333333,17.169308333333333,17.35975,17.760583333333333,17.987624999999998,18.073941666666666,18.107241666666667,18.092233333333336,18.19216666666667,18.491983333333334,19.145774999999997,19.664683333333333,19.944149999999997,20.00278333333333,20.128375,20.193591666666666,20.720525,21.397016666666662,22.19425,22.643575,22.492058333333333,22.28441666666667,21.668041666666667,21.078216666666666,20.88625,20.91,20.857499999999998,20.8675,20.624166666666667,20.4675,20.5975,19.84416666666667,19.970833333333335,20.662499999999998,21.351825,21.499183333333335,21.525850000000002,21.5746,21.7496,21.535433333333334,21.55626666666667,21.577099999999998,20.7921,21.1746,21.337100000000003,20.667933333333334,20.169441666666668,20.038750000000004,20.131249999999998,19.933333333333334,19.435000000000006,19.253333333333334,19.270000000000003,19.477500000000003,20.075833333333335,20.35083333333333,20.228333333333335,20.436666666666664,20.919166666666666,21.44666666666667,21.879166666666666,22.156783333333337,22.329283333333336,22.583450000000003,22.861783333333335,22.932616666666664,22.99011666666667,23.316783333333333,23.597616666666667,23.714283333333338,23.208450000000003,22.763450000000002,22.514283333333335,22.33320833333333,22.686999999999998,23.246999999999996,23.498666666666665,23.266166666666663,23.483666666666664,23.391999999999996,22.825333333333333,22.608666666666668,22.730333333333338,23.082833333333337,23.25616666666666,23.384708333333332,23.048416666666665,22.395083333333336,21.73341666666667,21.994250000000005,21.947583333333338,22.517583333333334,23.70925,23.539250000000006,23.711750000000006,23.72675,23.615083333333335,23.409841666666665,22.942341666666664,23.058175000000002,23.44984166666666,22.705675,21.854008333333336,21.657341666666667,21.504841666666664,22.401508333333336,23.107341666666667,23.570675000000005,24.211508333333338,25.158558333333332,26.855224999999994,28.268558333333328,29.075225,30.39855833333333,31.646058333333333,31.612725000000008,31.86605833333334,32.20939166666667,31.88355833333334,31.614391666666673,31.79189166666667,31.980649999999997,32.11481666666666,32.28731666666667,32.74815,33.274816666666666,33.880649999999996,34.82898333333333,34.68565,34.642316666666666,35.28565,35.94981666666666,35.835649999999994,35.42519166666667,35.316858333333336,35.22519166666667,34.867691666666666,34.881858333333334,34.422691666666665,33.85769166666666,34.35685833333333,34.766625,34.41495833333333,33.761625,33.26745833333333,33.08643333333333,32.238099999999996,31.105599999999995,31.486433333333334,31.1356,31.60643333333333,32.26226666666667,32.451433333333334,31.826666666666668,31.580000000000002,31.834166666666665,32.25666666666666,33.13166666666667,34.052499999999995,34.98333333333333,34.464999999999996,34.4575,35.03249999999999,35.08333333333333,34.66833333333333,34.4375,34.92083333333333,34.990833333333335,34.73416666666666,33.744166666666665,32.665,31.846666666666664,31.6975,30.225000000000005,28.95416666666667,27.528333333333332,27.0125],"Mercado Público":[null,null,null,null,null,null,null,null,null,null,null,12.59135,12.447275,12.22705,12.093775,12.108024999999998,12.158358333333334,12.032608333333334,11.802366666666666,11.820483333333335,11.966924999999998,12.188216666666667,12.143008333333333,12.0281,11.936541666666665,11.939441666666667,11.900541666666669,11.857375,11.794424999999999,11.863674999999999,12.069216666666668,12.281266666666667,12.32635,12.352649999999999,12.532066666666667,12.643691666666667,12.956766666666667,13.161850000000001,13.321150000000001,13.345350000000002,13.420508333333332,13.500341666666664,13.493024999999996,13.34245,13.144300000000001,12.989991666666668,12.828691666666666,12.697216666666664,12.592391666666666,12.590416666666668,12.586174999999999,12.530383333333333,12.3474,12.374408333333333,12.533341666666667,12.754866666666667,12.907008333333332,12.998166666666664,13.169174999999997,13.509208333333332,13.796708333333333,14.022591666666665,14.140333333333333,14.302891666666667,14.648516666666666,14.913324999999999,15.179699999999999,15.438441666666668,15.443366666666668,15.263175000000002,15.021133333333337,14.6561,14.272891666666666,14.111266666666666,14.035416666666665,13.924616666666665,13.854766666666665,13.528175,13.035200000000001,12.591941666666665,12.7448,13.233458333333333,13.682541666666667,14.063225000000003,14.428758333333333,14.48415,14.454075000000001,14.737383333333336,15.035875000000003,15.514816666666668,16.127058333333334,16.69800833333333,16.92665,16.866591666666665,16.868841666666665,16.885383333333333,16.991591666666668,17.098700000000004,17.41775,17.548975,17.590941666666666,17.459275,17.138975,16.78450833333333,16.648799999999998,16.924125,17.153208333333332,17.47083333333333,17.897499999999997,18.403333333333332,18.845000000000002,19.19333333333333,19.398333333333333,19.715833333333332,20.061666666666664,20.395833333333332,20.587500000000002,20.44416666666667,20.313333333333336,20.153333333333332,19.918333333333333,19.705833333333334,19.48333333333333,19.2775,19.171666666666663,19.120833333333334,19.215833333333332,19.5275,19.933333333333334,20.4425,20.8125,21.03916666666667,21.244408333333336,21.28721666666667,21.167858333333335,21.086016666666666,21.07756666666667,21.162375,21.346541666666667,21.196466666666666,20.99599166666667,20.73575,20.755291666666665,21.054083333333335,21.367175,21.857699999999994,22.220391666666668,22.369424999999996,22.512191666666663,22.599091666666666,22.807383333333334,23.158041666666662,23.765016666666664,24.41098333333333,24.830416666666665,25.010791666666666,25.209958333333333,25.399124999999998,25.919124999999998,26.726100000000002,27.58095,28.367575000000002,28.335641666666675,28.076725000000007,27.68939166666667,27.09866666666667,26.742191666666667,26.715525,26.69135833333333,26.594691666666666,26.362191666666664,26.253024999999997,26.52635833333333,25.917191666666668,25.816666666666674,26.610000000000003,27.27916666666667,27.65851666666667,27.90185,28.119691666666668,28.492191666666667,28.529691666666665,28.536358333333336,28.773025,28.078858333333333,28.383858333333336,28.863024999999993,28.405525,27.97469166666667,27.687008333333335,28.007008333333335,27.945833333333336,27.540000000000003,27.46666666666667,27.608333333333334,27.705000000000002,28.320833333333336,28.50916666666667,28.18416666666667,28.280833333333334,28.75333333333333,29.53333333333333,29.68583333333333,29.78735,29.83068333333333,29.828183333333328,29.991516666666666,30.129849999999994,30.154016666666664,30.494850000000003,30.95568333333333,31.06901666666667,30.766516666666664,30.225683333333333,30.085683333333332,30.027666666666665,30.317516666666666,30.885850000000005,31.333349999999996,31.279183333333332,31.504183333333334,31.35168333333333,30.63585,30.259183333333336,29.862516666666664,29.672516666666667,29.39418333333333,29.490291666666668,29.214608333333334,28.659608333333335,27.837108333333333,27.532108333333326,27.099608333333336,27.371275,28.656275000000004,29.11544166666667,29.896275000000003,30.53294166666667,30.603775,30.24135,29.891350000000003,29.678016666666668,29.93468333333334,29.347183333333337,28.642183333333335,28.433850000000003,27.960516666666667,28.28051666666667,28.57968333333334,28.913016666666675,29.649683333333332,30.616783333333334,31.85345,33.11761666666667,33.920116666666665,35.10928333333334,36.16261666666667,36.54345,37.31345,37.99928333333333,38.24345,38.526783333333334,38.67261666666667,38.726958333333336,38.880291666666665,39.00779166666667,39.575291666666665,40.44945833333334,41.56279166666666,42.726125,43.01445833333333,43.196125,44.060291666666664,44.788624999999996,45.162791666666664,45.24681666666666,45.85348333333334,46.65181666666666,46.85681666666667,47.31598333333333,46.97348333333333,46.25348333333334,46.45098333333334,46.980258333333346,46.64109166666666,45.67609166666666,44.82109166666666,44.25010833333334,43.291774999999994,42.12094166666666,42.796775,43.076775,44.145941666666666,45.543441666666666,46.252608333333335,45.88083333333333,45.28916666666666,45.71583333333333,46.676666666666655,48.26333333333333,49.87916666666667,51.20083333333334,50.77250000000001,50.36750000000001,51.105,51.41916666666666,50.991666666666674,50.36666666666667,51.04583333333333,51.20083333333333,51.09166666666666,49.76666666666666,48.32833333333334,46.95583333333334,46.35583333333333,44.751666666666665,42.89499999999999,40.94666666666667,40.08083333333333],"Rosticero":[null,null,null,null,null,null,null,null,null,null,null,14.315041666666666,14.141866666666667,13.811691666666666,13.6957,13.687325000000001,13.613308333333334,13.417200000000001,13.180683333333334,13.176441666666667,13.265408333333331,13.600499999999998,13.916000000000002,13.966458333333335,14.199416666666666,14.385383333333335,14.336841666666666,14.342125000000001,14.313333333333334,14.334525,14.502883333333335,14.717308333333333,14.83135,14.889683333333332,14.907766666666666,15.061633333333333,15.043825,15.154483333333337,15.393725000000002,15.337291666666665,15.498541666666668,15.571633333333333,15.471558333333334,15.210925000000001,15.026758333333333,15.046581818181817,14.895672727272727,14.6781,14.71654,14.864069999999998,14.88012,15.04261,14.97551,15.208520000000002,15.45771,15.77692,15.9906,15.732272727272727,15.878636363636366,16.131141666666668,16.290075,16.225808333333337,16.296725000000002,16.22125,16.334366666666664,16.56319166666667,16.860983333333333,17.035675,16.865,16.624841666666665,16.225258333333333,15.788358333333333,15.3894,15.443266666666666,15.294533333333334,15.199541666666667,15.082266666666667,14.551391666666666,14.027741666666664,13.658283333333332,13.920308333333333,14.375133333333332,14.891716666666667,15.351358333333335,15.639658333333335,15.655274999999998,15.710758333333331,16.136,16.528766666666666,17.005925,17.481525,17.964208333333335,18.073166666666665,18.060141666666667,18.020475,17.911675,18.03114166666667,18.027283333333333,18.2907,18.270133333333334,18.140891666666665,18.015933333333333,17.87505833333333,17.686725,17.586058333333334,17.68616666666667,17.939666666666668,18.332500000000003,18.880000000000003,19.57916666666667,20.076666666666668,20.474166666666665,20.866666666666667,21.35166666666667,21.680000000000003,21.980833333333333,22.25833333333333,22.284166666666664,22.179999999999996,22.03416666666666,21.75833333333333,21.411666666666665,21.166666666666668,20.975833333333334,20.765833333333333,20.62666666666667,20.633333333333336,20.788333333333334,21.110000000000003,21.584999999999997,21.96166666666667,22.11833333333333,22.267616666666665,22.350641666666665,22.29143333333333,22.1849,22.23804166666667,22.33289166666667,22.492175,22.495433333333335,22.34833333333333,22.0402,22.076533333333334,22.314225000000004,22.57101666666667,22.99475,23.230549999999997,23.251775,23.233783333333335,23.240641666666665,23.42465,23.593641666666667,24.08140833333333,24.710266666666666,24.977075,25.030075,25.156499999999998,25.143908333333332,25.65315,26.543458333333337,27.45914166666667,28.274933333333337,28.43461666666667,28.42986666666667,28.0917,27.62514166666666,27.2945,27.270475,27.357975,27.339641666666665,27.060475,26.80464166666667,26.872975,26.31630833333334,26.092500000000005,26.549166666666675,27.03186666666667,27.220708333333338,27.48404166666667,27.774191666666667,27.93335833333333,27.955858333333335,28.157525000000003,28.50669166666667,28.072525,28.229191666666665,28.402525,27.980025,27.58565833333334,27.396816666666666,27.421816666666672,27.264166666666668,27.018333333333334,26.915833333333328,26.865,26.769166666666663,26.886666666666667,26.85666666666667,26.727500000000003,26.951666666666668,27.33333333333334,27.86666666666667,28.19333333333333,28.474883333333327,28.633216666666666,28.798216666666665,28.86905,29.10405,29.594050000000006,30.03905,30.412383333333334,30.64655,30.614049999999995,30.52905,30.43488333333333,30.36433333333333,30.487133333333333,30.723799999999994,31.07213333333333,31.211299999999994,31.062966666666664,30.700466666666667,30.44713333333333,30.0838,29.88463333333333,29.705466666666666,29.85213333333333,30.041616666666666,30.063816666666668,29.996316666666672,29.642983333333333,29.199650000000002,29.215483333333335,29.787149999999997,30.72465,31.214649999999995,31.50381666666667,31.767983333333333,31.749650000000003,31.66779166666667,31.435291666666668,31.279458333333338,31.436958333333337,31.10529166666667,30.335291666666667,30.216958333333334,30.04779166666667,30.356125000000002,30.948625000000003,31.607791666666675,32.271125000000005,33.116533333333344,34.24903333333333,35.39403333333334,36.299033333333334,37.72070000000001,39.274866666666675,39.90486666666667,40.295700000000004,40.72736666666667,40.86986666666667,40.869033333333334,40.8007,40.589075,40.43824166666666,40.799074999999995,41.26157499999999,41.70907499999999,42.196574999999996,42.714075,43.012408333333326,43.399075,43.880741666666665,44.569075,45.155741666666664,45.540275,45.94194166666666,46.133608333333335,46.26110833333333,46.324441666666665,46.14944166666666,45.66860833333334,45.652775,45.5379,45.23956666666667,44.6004,44.36873333333333,44.20429166666667,44.06679166666667,43.443458333333325,43.155125,42.800125,42.771791666666665,43.29179166666666,43.45179166666667,43.49666666666667,43.26583333333334,43.303333333333335,43.43916666666667,44.20583333333334,44.87416666666667,45.51333333333333,45.7925,46.20333333333334,46.99583333333333,47.11000000000001,46.64333333333334,45.84666666666666,45.99666666666667,46.009166666666665,45.73083333333333,44.83583333333333,43.88916666666666,42.95416666666667,42.37166666666666,41.594166666666666,40.3,39.114999999999995,38.76083333333333]},"chYoy":{"labels":["Ene 00","Feb 00","Mar 00","Abr 00","May 00","Jun 00","Jul 00","Ago 00","Sep 00","Oct 00","Nov 00","Dic 00","Ene 01","Feb 01","Mar 01","Abr 01","May 01","Jun 01","Jul 01","Ago 01","Sep 01","Oct 01","Nov 01","Dic 01","Ene 02","Feb 02","Mar 02","Abr 02","May 02","Jun 02","Jul 02","Ago 02","Sep 02","Oct 02","Nov 02","Dic 02","Ene 03","Feb 03","Mar 03","Abr 03","May 03","Jun 03","Jul 03","Ago 03","Sep 03","Oct 03","Nov 03","Dic 03","Ene 04","Feb 04","Mar 04","Abr 04","May 04","Jun 04","Jul 04","Ago 04","Sep 04","Oct 04","Nov 04","Dic 04","Ene 05","Feb 05","Mar 05","Abr 05","May 05","Jun 05","Jul 05","Ago 05","Sep 05","Oct 05","Nov 05","Dic 05","Ene 06","Feb 06","Mar 06","Abr 06","May 06","Jun 06","Jul 06","Ago 06","Sep 06","Oct 06","Nov 06","Dic 06","Ene 07","Feb 07","Mar 07","Abr 07","May 07","Jun 07","Jul 07","Ago 07","Sep 07","Oct 07","Nov 07","Dic 07","Ene 08","Feb 08","Mar 08","Abr 08","May 08","Jun 08","Jul 08","Ago 08","Sep 08","Oct 08","Nov 08","Dic 08","Ene 09","Feb 09","Mar 09","Abr 09","May 09","Jun 09","Jul 09","Ago 09","Sep 09","Oct 09","Nov 09","Dic 09","Ene 10","Feb 10","Mar 10","Abr 10","May 10","Jun 10","Jul 10","Ago 10","Sep 10","Oct 10","Nov 10","Dic 10","Ene 11","Feb 11","Mar 11","Abr 11","May 11","Jun 11","Jul 11","Ago 11","Sep 11","Oct 11","Nov 11","Dic 11","Ene 12","Feb 12","Mar 12","Abr 12","May 12","Jun 12","Jul 12","Ago 12","Sep 12","Oct 12","Nov 12","Dic 12","Ene 13","Feb 13","Mar 13","Abr 13","May 13","Jun 13","Jul 13","Ago 13","Sep 13","Oct 13","Nov 13","Dic 13","Ene 14","Feb 14","Mar 14","Abr 14","May 14","Jun 14","Jul 14","Ago 14","Sep 14","Oct 14","Nov 14","Dic 14","Ene 15","Feb 15","Mar 15","Abr 15","May 15","Jun 15","Jul 15","Ago 15","Sep 15","Oct 15","Nov 15","Dic 15","Ene 16","Feb 16","Mar 16","Abr 16","May 16","Jun 16","Jul 16","Ago 16","Sep 16","Oct 16","Nov 16","Dic 16","Ene 17","Feb 17","Mar 17","Abr 17","May 17","Jun 17","Jul 17","Ago 17","Sep 17","Oct 17","Nov 17","Dic 17","Ene 18","Feb 18","Mar 18","Abr 18","May 18","Jun 18","Jul 18","Ago 18","Sep 18","Oct 18","Nov 18","Dic 18","Ene 19","Feb 19","Mar 19","Abr 19","May 19","Jun 19","Jul 19","Ago 19","Sep 19","Oct 19","Nov 19","Dic 19","Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26"],"Granja":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,-4.317931793179318,-1.8013381369017059,-10.710607621009277,0.7398273736128342,-13.000719597025654,-16.145957548294785,20.35282587389743,15.62707365627074,-13.82335148215367,-27.785280216070223,-19.579017707985297,-14.353891336270191,-30.49726933026732,-35.29874213836477,9.832756632064601,-11.995104039167682,4.108078301626674,12.627986348122883,0.29858849077089966,-20.803443328550934,-13.267813267813262,9.20991117344553,14.208558371416693,40.3343334762109,39.61952026468155,32.523288780882936,-20.110265161459708,-7.037552155771907,23.596398305084758,1.0353535353535268,-15.642760487144791,-19.565217391304355,16.268717118575474,3.724315068493155,-10.367406329574383,-33.200977397678685,-35.48578199052132,-26.100244498777503,-4.79789681235623,-39.52722920406942,-36.81165631026356,-40.43989002749313,-12.479948668591595],"Andén/Pie":[null,null,null,null,null,null,null,null,null,null,null,null,-29.65345100778628,-27.84097014352598,-19.3660061899748,10.49673594276324,0.23846437799925677,-29.376494470009472,-15.310935477154008,21.770700458374797,40.09366727754021,27.705527487641803,-5.81739833019123,-8.022211720226842,10.453273914043873,8.514508168822323,-0.2611637615495605,2.136400986031223,-1.5967828655181753,25.447515394529574,26.904698273558182,27.567629791642688,-5.191678779069755,3.7738062232079956,9.29368029739777,5.024455313472652,44.717078358495314,32.325697650483725,21.575648172025947,-18.439259855189057,4.8044609108940515,3.6015981735159888,-13.012896649903553,-22.73457380569943,-16.66650697072773,-14.036602032532851,1.0716902145473697,-0.6538714836767304,-14.267964695632413,-8.3237037037037,3.6067713644707315,16.34444663641744,-14.300405644746613,16.429633943820495,45.60112332348813,61.328599458095844,24.300054041002156,18.863932486223497,20.627705179447872,38.95544296604953,25.879712270903653,9.107730097040312,-6.2135815301269295,10.248410343365833,34.86,12.075142633101688,17.17335638987728,1.7649273180054457,-27.715646824846207,-29.07238681389408,-31.64513498433409,-21.18789613575956,-18.630658205099408,7.012996630503196,9.159145291969265,-20.138728679309125,-4.148746848583718,-34.25615971531107,-42.0465897738625,-24.895073057606666,60.94467834610906,83.0580328659133,52.11603666959688,19.76721059139924,4.960788204539777,-17.69004532715131,-20.04861014967619,46.17717862301397,5.729186812620082,44.84036697247705,61.09892262487756,41.890355945367396,-5.710560003816592,-25.80610182094199,-7.1575992735077945,0.30685920577617637,18.199228992511856,13.248474046173776,40.64724670027321,4.146767234280822,10.24054144690709,-14.23648939674175,-32.75859972519789,-33.246553853342675,14.517013112956958,55.12939628983933,33.29183709763471,21.07252114450243,34.979137691237824,46.69636228656274,30.642954856361165,11.638203668564188,6.8030973451327466,31.75775480059085,38.517179023508135,29.700000000000003,5.743740795287183,-17.294751009421265,-16.07738492328219,-12.068965517241386,-18.28954147346729,-17.914979757085035,-15.340314136125652,-4.985835694050986,-3.0036250647332903,0,23.368146214099205,45.48959136468774,23.467966573816163,39.86981285598049,17.48807631160572,14.131169709263016,19.530895334174023,-1.1874229346485745,-9.63327149041436,-1.2146690518783623,-2.0096102509343314,12.545964125560532,4.0687830687830795,-18.05034446210917,-14.376762549351389,-12.152414194299013,12.990527740189444,14.463270142180104,12.054795965734057,30.011105981007518,18.64525091874654,6.252452267555229,2.1772295353500106,-0.8969927583149859,6.096903757181357,23.265799701239644,51.679731243001115,41.23501754850671,20.081437125748504,3.641558065150548,7.094605727089999,3.7557468782093846,36.472705458908216,46.11892899142715,51.01422690527484,27.097562078791444,-8.712778294246752,-13.071761700163146,-32.12168588365578,-33.18610833696707,-11.48721426576774,1.4232209737827723,-2.7692307692307647,0.5550416281220972,-12.341504649196965,-7.309486780715393,5.508474576271182,-35.745353894820084,7.979002624671913,50.090525045262524,52.923224568138195,12.409122807017543,1.8028169014084523,2.8803545051698713,9.49367088607594,-11.82152713891443,1.2054001928640308,1.0486577181208054,-31.526104417670673,28.24615384615384,9.479824987846374,-32.28789706473663,-25.026880708228212,-9.79067691328044,6.142778085224125,-11.366355587461115,-24.690338563170936,-11.371935315597304,0.9528346831824814,10.336239103362384,35.09286412512218,15.834932821497125,-6.527531083481344,14.84560570071259,32.31026785714285,43.80622837370244,27.059436913451517,17.988120950323985,11.348684210526319,17.9517363154797,15.762151958470975,3.1978931527464316,2.496382054992756,16.23860811930405,16.00950118764846,7.2388831437435295,-25.60101223112611,-25.697786333012516,-12.269183422240468,-9.943985282407542,20.903495814869522,33.53293413173654,12.311455360782713,-10.171345242435287,9.21284857042006,-3.9201710620099717,-27.846027846027848,-12.536162005785911,8.27664399092971,27.396373056994832,9.728718428437801,7.838503951012529,-16.43420007737574,-29.297458893871447,-28.820326678765884,12.702922077922075,-1.8099547511312288,25.370919881305625,81.1577752553916,-11.24586549062844,10.837696335078535,0.9150991357397036,-5.711849957374254,-11.605956363979084,-27.339181286549707,7.3467230443974465,23.967363590005096,-32.15700396110911,-33.6405529953917,-6.982248520710048,-5.733082706766923,66.83229813664595,40.00944733112895,28.01007556675062,34.764918625678106,60.585027268220124,136.55264922870558,83.50566223535208,39.81900452488689,84.28874734607218,74.2559523809524,-1.2722646310432637,10.103024260551688,15.338793745346244,-13.191632928475034,-12.711530893349076,7.145253270714534,7.519578258257063,4.564785937056987,5.55406493158036,16.26949102677258,18.202764976958527,20.694563051522902,36.662371134020624,-5.191669182010269,-1.6785022595222712,30.003886513797134,35.933273219116316,-4.289292423293679,-15.2078869203836,-3.5249457700650875,-2.7961362480935468,-10.85526315789475,0.4142300194931815,-12.99528301886792,-15.983026874115986,19.070359758038833,16.143138542350627,-12.615844544095673,-26.00331674958541,-19.398102715080142,-7.910116778274216,-28.611579539066895,-35.5387029288703,12.971898949758732,-10.215966998301385,15.315803740851175,22.08193041526374,6.069518716577549,-21.19218027430097,-10.126582278481015,13.67099955177051,20.5762987012987,41.518386714116254,43.503937007874036,45.314401622718066,-15.628140703517587,-0.24324324324325247,16.220028208744708,1.401976557113306,-12.553566927148987,-9.935437589670013,22.07841644461363,3.3123028391167186,-10.366879838438242,-33.19362950544845,-35.5281207133059,-27.41485203796762,-5.330553901131624,-47.8732050934706,-30.84546925566343,-38.78059836808703,-17.843759008359754],"Mercado Público":[null,null,null,null,null,null,null,null,null,null,null,null,-13.468939405743127,-18.836736875868716,-11.314467633533779,1.233712826284572,4.223628544456495,-10.4864489228631,-20.00231667499222,2.087774896763657,16.986621814947984,29.1432083319615,-4.9942462600690485,-10.607820661748313,-9.89169285064778,0.30561703024555287,-3.7237649273674465,-3.691667379343759,-5.068267972759903,6.451362471857772,22.32126696832579,23.937010836845282,4.470150795290233,2.681985825246018,20.862403100775197,11.527538726333916,37.536718422156945,21.54689360509911,15.83905741202595,2.148946246744021,6.374257019881119,6.986581096849475,-0.6495764436059737,-13.714611005692603,-18.806501364337397,-15.324836547215103,-15.518319570271794,-12.174080790153942,-9.138062547673528,-0.17071730079379824,-0.36407853796358225,-4.850043465662135,-14.589063849578102,2.2092706203135624,14.202417210899053,23.38385482182599,17.784466719269016,10.691700956867665,19.474443411088117,35.85021701312621,27.583229396526903,19.558550822936894,10.143148403399945,14.851726369484956,32.26320866264236,21.19300258101521,20.843250151605048,22.136114755033358,0.4887771473940076,-19.092819552855577,-23.070812979069853,-28.329733155695823,-28.81699002356244,-11.705241558284804,-5.932540329151049,-8.813936838755874,-4.929805266222426,-21.56693338029254,-31.920852129243915,-31.04901554464634,15.096498086498505,63.99611476715885,55.642746515229724,41.22254507390497,38.61573540157231,4.543403964456594,-2.500640923484123,24.71502515339208,22.159052244115195,40.32428943287938,58.23155024689499,58.00274292680447,19.61915794290945,-4.796097638885185,0.17911635929415565,1.268370607028749,8.094376170969483,8.403564633500478,27.208380118538294,9.179087512313979,2.550338289510993,-7.8999999999999915,-19.253040533771458,-22.790887074305058,-9.734883581911113,23.094344370583165,18.204092444208992,24.04959459885794,30.082256169212695,36.610373944511466,29.60893854748604,22.31713828083289,12.148148148148152,20.684039087947873,25.744416873449122,27.82789729354616,15.231788079470194,-9.767177739920493,-8.795518207282914,-9.766022380467962,-12.737127371273713,-11.258278145695352,-11.508620689655165,-10.781318201658658,-5.592250110083661,-2.7440395861448468,5.624074987666505,20.30401737242127,27.988505747126446,38.45185651353052,27.27272727272726,15.332581736189418,12.747929606625267,2.5557213930348257,-6.9766195811008345,-4.804794520547958,-0.4729477611940378,4.707215541165577,10.32227930873424,-8.12680505415162,-10.802424786708574,-14.195000000000006,1.1317567567567597,17.524437927663733,17.24793301167428,28.555281196485822,22.789655298805613,9.191125455470544,8.02864292877696,4.606475039425383,10.582133784928017,20.66839889779017,36.667287545999606,41.063510814690815,24.019661647856076,9.00168430683496,9.357870007830856,8.566037735849056,26.609808102345422,45.57828892560115,44.50064637034853,39.861911699499586,-1.4671031221883983,-12.647046851467413,-17.120966553705614,-26.620525973855276,-16.460479380630062,-1.220908050362458,-1.0383100608664488,-4.031977754605492,-9.397103401818804,-4.23537019075331,9.846892824977486,-22.07125603864734,-4.6871539420973445,44.36160298229264,35.68888888888889,23.29682702149437,13.450023030861344,10.096948628814216,16.172214182344426,1.6298442593263285,0.2973977695167355,9.588116137744766,-22.7657830008199,14.180550174351028,23.440684875662456,-17.72111039380246,-16.934163118244356,-14.329118967964726,15.590742996345918,-2.5754189748141547,-15.166614761756467,-3.1361368496079796,6.3009636767976245,3.573629081947001,26.15003538570416,7.668815744825251,-12.879788639365925,4.55080423695567,22.358044164037864,45.348837209302324,6.427818756585886,4.386748289521064,1.9089574155653568,-0.11037527593819403,6.834030683403071,4.937537180249862,0.8134642356241211,12.890009454774662,20.962850644427604,5.103189493433407,-11.698356429262011,-21.63333333333333,-5.544554455445543,-2.401666885146361,12.529538904899127,25.119705340699817,17.526109660574406,-1.84240362811791,7.512520868113532,-5.108877721943044,-26.91946098401755,-16.137093895037495,-17.37226277372262,-9.698000850701833,-11.670160726764498,4.076417361798381,-10.590238874198896,-19.605534294966148,-27.40905304082199,-10.568870921166628,-13.431677018633534,9.591056192997934,66.12349914236707,23.4567901234568,41.386925795052996,35.986811116344796,3.3623417721518902,-14.77009913296859,-15.037593984962403,-9.373855730501642,11.78270849273144,-22.763965127542775,-25.291479820627817,-6.7114093959731544,-14.661848218895196,13.24137931034484,11.215245235863804,13.855213023900228,33.83084577114428,46.24285748440003,62.536873156342175,61.2929292929293,32.956878850102676,59.657190635451485,50.58023209283715,13.15107913669065,27.949183303085285,25.060901339829467,8.230337078651683,10.343778521448147,5.004289390906491,1.7767714583094847,4.770547057298409,3.832665330661325,17.528957528957516,27.467923540193773,35.50358756311453,35.503560528992885,8.179669030732862,5.3080107134161185,26.91409291461198,24.0970499035015,12.227668845315911,2.6993454428634682,18.015342736946305,23.11218335343787,5.387647831800265,11.318816762530808,-8.060404000784466,-16.216216216216218,5.179195804195815,14.685086705202316,-8.323108384458079,-25.72761608531437,-24.896869691822378,-17.860997137777687,-24.114070035646886,-27.532823829120133,16.853699085619283,6.200405978962908,27.367747440273032,37.56720430107526,17.6812798670268,-8.994320713368403,-15.83760874414455,15.315584804068195,37.25363489499192,60.42526182164391,53.57833655705997,42.88804759329369,-9.14102792103858,-8.444830582102519,14.821637916596886,6.1390652988112855,-9.057203389830514,-16.614975631369074,21.600848131460392,4.824902723735407,-3.083804143126166,-31.454005934718097,-31.054336092119467,-31.169568508705538,-14.092777451556081,-36.53444676409186,-32.497082847141186,-35.86989874194539,-20.170840613473114],"Rosticero":[null,null,null,null,null,null,null,null,null,null,null,null,-14.362430022807377,-26.168020606300768,-9.546639231824415,-0.6254317345928999,-5.134905447671031,-14.176506024096389,-17.519212369988594,-0.38420023701154404,8.671637669152158,39.861810539672476,33.933853186340414,4.141728513287043,22.560911636765695,19.96260812781222,-4.416860654681111,0.39703414243129975,-2.105538999701371,1.7849747660861732,15.119403096772269,19.49702214072469,10.228716645489207,4.961477669806568,1.4521849695509639,12.127422003284078,-1.4071801085181552,9.901942507736472,22.774798502252956,-4.224104592123161,12.045867675987939,6.048548375974074,-7.806872700323747,-19.831964744301075,-14.985590778097988,null,-10.949868073878628,null,2.5673392240544537,10.00990609564131,1.037056181953289,10.582496450575086,-3.7280677386018883,15.1520669003323,17.571236170557842,25.248163000577417,17.043270189431713,null,11.925925925925922,null,12.419011401892268,-4.756471379142321,5.442220374752185,-5.3340793309579375,7.833745007964163,15.506375577416105,21.432084252950766,13.238395958320174,-13.95705416953449,-21.91725606510001,-31.73395102581072,-27.726919354582808,-27.730634893971946,4.185850736603516,-10.824842309558461,-7.091664696586987,-7.531709927749529,-31.14534494306765,-31.035555709212677,-24.724922342496082,24.902979518778405,53.159119907276654,60.09694619486186,40.36104464396782,27.728263657348034,1.1647782011200285,4.5282659557103155,34.1699087311419,27.27909386087269,40.65650827913317,40.87285956758073,42.91217828090503,8.290796106654826,-0.9939586645468991,-2.8824028097371874,-6.8065229177962125,8.99575813860094,-0.2844626850082554,20.567375886524832,-1.2317336101573124,-7.052462609533936,-7.569600444231309,-8.594087593096262,-11.715914981855875,-7.073427801850335,7.716122733433105,18.967452300785624,26.370552696352647,37.82383419689119,51.69439309919902,32.21802482460873,24.103082364830723,23.04305283757337,31.785909339158934,21.913236929922142,21.19788608338226,20.982986767485823,1.8485390578413758,-6.551362683438155,-7.746790615316512,-13.826232247284887,-16.896831844029244,-12.000000000000005,-9.324104234527685,-10.019880715705764,-6.920845420638202,0.3649635036496272,9.011627906976742,20.104166666666664,33.37236533957847,25.350532809871023,9.021113243761992,8.683470673776052,4.86950146627565,-3.2954545454545445,-5.740458015267182,2.8179407865665156,5.067675868210141,8.68818181818182,0.1737777777777833,-7.654813529921943,-16.23178226514487,1.9507829977628632,12.554137323943662,13.743566414229273,23.698400935855677,13.571548478380773,1.213342479849098,-0.9278957524809126,0.34875541354849116,9.2345073897806,8.997253661415048,27.486522531322205,39.54586425187607,14.051171772140783,2.4870660832228735,5.94873524187445,-0.5693057183010484,25.807146386475843,50.28499079839782,47.66742727249065,41.33992103207281,7.33628132238366,-0.2320185614849131,-14.947694121113894,-21.02505942836112,-15.267607368101066,-1.1000331955907081,3.886010362694303,-0.8336491095111741,-11.245384357166827,-9.61478233636079,2.408930669800236,-19.95817149686286,-9.579571760291334,22.358221134230913,25.086184495452578,10.775558725630043,14.350590372388739,13.43287037037037,6.804417527609548,1.0317157050057302,9.152798789712548,14.51836451836451,-14.945496270797479,7.017543859649132,8.205128205128197,-16.905635211737234,-16.385064953051,-9.727379260906325,1.1914217633042126,-6.434299940819948,-9.83989326217478,-4.652042360060515,-2.1136521136521114,-3.479576399394852,4.755480607082632,-1.2556679455877326,-5.6507473569084965,10.79454253611556,18.964803312629407,30.432715168806457,15.384615384615378,12.281352235550704,7.0292267850536385,7.854026180087269,3.008849557522129,8.840125391849531,18.931101094655503,18.862592723419287,17.310664605873264,10.177471930459987,-1.3574660633484181,-3.7185563251913947,-3.8435374149659833,-2.7408170004467625,5.093674386450056,10.44501655020228,14.364261168384878,4.809907834101387,-4.818624796968059,-12.927191679049027,-10.013175230566532,-14.332675871137418,-8.4333098094566,-8.140855736463456,6.2256809338521455,7.56873710139139,0.8762120275230594,-2.697302697302705,-12.74038461538462,-14.619400934322616,0.5403868031854518,23.412969283276436,41.178623718887266,22.56331542594015,13.371868978805404,13.066776586974434,-0.7326007326007405,-3.039689563619041,-9.096837300293455,-6.399726214921278,6.508264462809919,-12.809784357901513,-26.138613861386144,-3.926991150442463,-5.263157894736845,11.584220413274886,24.16723317471108,28.837039737513688,26.70244884267026,32.37716820655209,48.74461979913917,50.23765996343693,35.11154219204656,62.97526762643041,71.42857142857143,21.761658031088068,12.835249042145588,14.534231200897866,4.681084040514648,-0.028296547821180292,-2.1710352131321162,-6.122463740163564,-4.36460091632506,10.537843757605252,13.280689160086157,12.16308040770103,13.069705093833782,14.680851063829788,8.682997817123468,11.366976972072514,15.115062761506278,23.379564109821697,19.052774018944515,11.850360436478697,12.153303076147253,5.063848524878901,3.2319391634980863,1.5347334410339217,-4.149377593360999,-11.894454751597602,-0.42401249721045486,-3.0323361196656453,-8.132666969559303,-17.595778848359718,-6.319618095021598,-4.530770343464219,-3.7095323741007165,-15.674769488683985,-7.080008184980563,-8.472553699284004,-0.7008864151721219,14.599906410856327,4.303003137606458,1.2216008983360347,-6.849653808110771,1.2527839643652443,3.95535064304781,22.126022126022136,18.725192621993937,19.06063618290257,7.377229685091394,10.712733594089526,19.742578368279005,2.797060024499805,-12.032660077352817,-21.425369789332127,4.77833820015927,0.4124278251306178,-7.79645191409898,-21.150059078377318,-22.340216322517207,-23.418910457107074,-14.33552091878588,-18.31207065750737,-26.9244105409154,-28.242303872889767,-10.381045432340011]},"chAnual":{"labels":["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],"a2022":[36.88,39.34,39.52,41.04,42.4,42.42,31.41,30.46,33.45,30.15,30.57,27.4623],"a2023":[35.58,38.24,35.23,41.21,36.89,35.64,37.4,35.3772,29.23,22.31,24.64,25.29],"a2024":[25.4,24.65,39.8,37,42.54,43.51,39.67,27.88,26.27,25.36,29.71,35.79],"a2025":[36.45,35.82,33.58,36.91,49.44,44.12,34.69,25.11,32.07,26.2,26.63,23.91],"a2026":[23.5,26,31.79,19.24,34.19,27.01,28.5,null,null,null,null,null]},"chReproductoras":{"labels":["Ene 15","Feb 15","Mar 15","Abr 15","May 15","Jun 15","Jul 15","Ago 15","Sep 15","Oct 15","Nov 15","Dic 15","Ene 16","Feb 16","Mar 16","Abr 16","May 16","Jun 16","Jul 16","Ago 16","Sep 16","Oct 16","Nov 16","Dic 16","Ene 17","Feb 17","Mar 17","Abr 17","May 17","Jun 17","Jul 17","Ago 17","Sep 17","Oct 17","Nov 17","Dic 17","Ene 18","Feb 18","Mar 18","Abr 18","May 18","Jun 18","Jul 18","Ago 18","Sep 18","Oct 18","Nov 18","Dic 18","Ene 19","Feb 19","Mar 19","Abr 19","May 19","Jun 19","Jul 19","Ago 19","Sep 19","Oct 19","Nov 19","Dic 19","Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26"],"valores":[884777,1058369,872366,1078981,1073829,911585,925641,1131282,1038732,919896,956489,971624,933462,932036,813894,1067047,1072193,978882,1004828,849194,1029143,1035870,1204012,1088569,1113688,1130650,1070096,1082279,1127925,881904,786463,1155857,847345,982416,1085775,990056,956108,921248,1070021,760145,1082495,1102588,944129,1064254,990569,1031659,1230157,1113732,1181942,1063234,1188031,1187070,1209556,1143933,1018566,1275075,1068029,1148010,1182085,1190324,1018619,1159221,1085857,1080278,1142600,1035155,1015111,1288641,1052344,1167690,1167009,1122979,1153124,1065008,1185403,1208324,1196558,1087427,1047412,1297652,1336238,1282071,1282963,1285963,1101903,1201476,1323532,1365142,1414304,1234745,1213335,1412808,1121238,1121749,1460791,1156604,1068716,1323368,1211907,1003887,1423660,1246597,1124130,1436499,1233233,1282204,1354872,1323608,1173873,1461951,1285861,1333918,1429382,1229244,1146186,1361443,1223600,1166716,1404025,1337819,1241406,1538838,1284635,1071386,1429467,1315516,1385589,1458001,1336556,1197657,1408898,1319427,1076942,1516727,1272353,1185653,1540917,1407953,1529521],"pm12":[null,null,null,null,null,null,null,null,null,null,null,985297.5833333334,989354.6666666666,978826.9166666666,973954.25,972959.75,972823.4166666666,978431.5,985030.4166666666,961523.0833333334,960724,970388.5,991015.4166666666,1000760.8333333334,1015779.6666666666,1032330.8333333334,1053681,1054950.3333333333,1059594.6666666667,1051513.1666666667,1033316.0833333334,1058871.3333333333,1043721.5,1039267,1029413.9166666666,1021204.5,1008072.8333333334,990622.6666666666,990616.4166666666,963771.9166666666,959986.0833333334,978376.4166666666,991515.25,983881.6666666666,995817,999920.5833333334,1011952.4166666666,1022258.75,1041078.25,1052910.4166666667,1062744.5833333333,1098321.6666666667,1108910.0833333333,1112355.5,1118558.5833333333,1136127,1142582,1152277.9166666667,1148271.9166666667,1154654.5833333333,1141044.3333333333,1149043.25,1140528.75,1131629.4166666667,1126049.75,1116984.9166666667,1116697,1117827.5,1116520.4166666667,1118160.4166666667,1116904.0833333333,1111292,1122500.75,1114649.6666666667,1122945.1666666667,1133615.6666666667,1138112.1666666667,1142468.1666666667,1145159.9166666667,1145910.8333333333,1169568.6666666667,1179100.4166666667,1188763.25,1202345.25,1198076.8333333333,1209449.1666666667,1220959.9166666667,1234028.0833333333,1252173.5833333333,1264450.0833333333,1278277,1287873.3333333333,1269956.6666666667,1256596.5,1271415.5,1260635.5833333333,1257870,1268027.6666666667,1258725.5833333333,1228621,1229400.6666666667,1230388.3333333333,1222954.5833333333,1224928.8333333333,1234261.75,1247633,1238806.4166666667,1252723.4166666667,1261486.5,1273035.0833333333,1279197.9166666667,1306700.5,1307177.3333333333,1305731.25,1307569.25,1301314.5833333333,1300511.8333333333,1290887.8333333333,1294983.9166666667,1296168.1666666667,1301795.9166666667,1308203.1666666667,1308101,1286223.3333333333,1286230.4166666667,1293419.75,1313370,1321416.5,1330829.5,1333407.9166666667,1333814,1332281.3333333333,1318576,1316733.4166666667,1315709.9166666667,1325232.1666666667,1334519.6666666667,1342222.75,1354217.0833333333]},"chRepAnual":{"labels":["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],"a2022":[1101903,1201476,1323532,1365142,1414304,1234745,1213335,1412808,1121238,1121749,1460791,1156604],"a2023":[1068716,1323368,1211907,1003887,1423660,1246597,1124130,1436499,1233233,1282204,1354872,1323608],"a2024":[1173873,1461951,1285861,1333918,1429382,1229244,1146186,1361443,1223600,1166716,1404025,1337819],"a2025":[1241406,1538838,1284635,1071386,1429467,1315516,1385589,1458001,1336556,1197657,1408898,1319427],"a2026":[1076942,1516727,1272353,1185653,1540917,1407953,1529521,null,null,null,null,null]},"chProduccion":{"labels":[1977,1978,1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],"toneladas":[399970,495615,587190,664520,749620,769785,794760,822510,885965,721805,799200,807525,872830,945350,1178450,1345653,1364375,1383216,1512000,1478349,1492937,1586841,1784320,1935966,2066510,2156514,2289891,2389715,2498300,2591764,2682775,2853228,2781476,2809945,2906214,2957922,2907394,3025133,3175010,3275204,3383287,3470706,3554041,3595727.987,3633753.589,3757278.337,3850078.235,3948450.97,4071543.521,4311595],"percapita":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,16.78704509,17.91975975,17.14359716,17.15763899,17.92163003,19.65852587,21.04484885,22.3828064,22.9812294,23.88483085,24.42979657,25.40620023,26.47325769,26.63234132,28.09918133,27.28023632,27.48548602,28.15495894,28.48120458,28.15989457,29.01469952,30.46066769,31.17654414,31.86445719,32.2589765,32.9989125,32.87476946,33.09090832,33.63732596,34.7422755,35.19093078,35.82421911,37.59]},"chTrade":{"labels":["Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"imp":[72607.835657,64529.006335,71672.368699,64332.6988170001,54623.649575,64397.25702100009,66931.70762000009,67478.2917110001,74689.16029000007,77253.1644480001,72520.4893650001,71645.5897310002,70299.72213400008,60856.39295900019,84596.6235609998,73313.02293200008,73815.56593700008,75416.94910900008,84973.52445600009,81782.0796700001,78066.93939900008,73221.643563,68126.49570500007,70275.99085700001,61552.039033000096,63171.1779800001,78463.96894100001,73281.58521200011,74541.794235,76820.72553300002,66190.5730770001,84968.34578199999,74425.67715799999,83991.9780689999,79338.32302499999,76546.17151299998,79644.64368300002,79384.77396799989,89681.58738399978,81035.58539000011,80437.622387,76800.1395049998,73271.630255,85647.646125,75254.48128299999,90105.13354899999,88958.57746499986,90480.8076929999,71905.46000299991,71337.409231,68556.9028059999,82454.3704589999,89950.61931899989,76551.776363,93757.35769500012,89834.211358,72864.76347100011,89030.29316599999,95119.70173300001,102581.78274100009,84644.4388019999,70514.1869740001,83811.38770599998,79839.82401400011,83827.09995100001,80443.263707,81060.81720399989,94298.04632100002,100119.98427399989,102056.147499,80771.93956799999,75628.5587350001,68758.412156,71884.65304499982,78630.0821109999,83565.31297199978,82706.91976099991,93230.0861599997,92609.8403859999,81307.1989979999],"precio":[0.9250460219032025,0.8727240839239876,0.9187166245140856,0.7964234248416651,0.7668436146475911,0.7655652879763191,0.714435455451463,0.7452248380428136,0.7829945393735026,0.8089477195911335,0.8611363057310704,0.9131524694751707,0.9592816506224,1.0777128841006391,1.1293690654353559,1.2949149639368414,1.4094106845200824,1.3497734828889039,1.299679689318232,1.229515992694585,1.2021028957793867,1.130939075698985,1.089073267516495,1.1080588155707185,1.2058347489351702,1.2048893648482015,1.3888962034285475,1.577984160743121,1.49912569717575,1.6229131711083333,1.488914762243474,1.625485584953153,1.411982069542682,1.2500230950120124,1.0757953164346354,1.0027724938522842,1.027578042156679,1.1234396277761638,1.2886243694732595,1.373609484440985,1.3231345034772761,1.188576882622962,1.1281655697218085,1.20596991767835,1.2389261740089266,1.311209595134269,1.358839943944638,1.3872814093612542,1.1052009814201478,1.1637070374399503,1.2668190243603779,1.4550409217051692,1.5125506118857162,1.5743109391205614,1.6531853111989392,1.6166056524279444,1.3848057770504103,1.535741402984997,1.739708283797098,1.837938226304788,1.4373955717385671,1.4232610508091246,1.591100763134206,1.568974832846565,1.5435184026323123,1.5240236860669432,1.4508356592156297,1.7365698861512395,1.73493277948258,1.624233321777857,1.4906709196766448,1.3337226744841908,1.3298648066096832,1.2811335419721694,1.358613986556096,1.4269176933896197,1.4221533152709644,1.4499078908993028,1.510874612210662,1.4595474064777714]},"chExport":{"labels":["Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"exp":[165.721,198.288,215.165225,432.45160000000004,201.15131999999997,277.12195999999994,335.55953000000005,360.77978,356.60859999999997,255.3957,383.51768,365.3052399999999,323.89009999999996,408.624124,358.95835999999997,240.06597150000002,283.036868,380.98436,415.299619,601.426905,524.5165649999999,540.76024,289.10817599999996,357.35467000000006,306.16196,421.28924,243.3971,264.80710999999997,448.064092,366.49857000000003,200.33519,321.54537,205.24946,314.70342999999997,186.21525,135.7558,218.43099999999998,145.206,209.260572,131.828,182.43565699999996,170.85272899999998,180.88441,92.27678,118.37454000000001,101.79888,175.95857,232.184317,208.75989,194.713961,118.670347,60.450849999999996,121.6605,154.478618,152.5284,130.1554,200.476759,218.6652,138.404362,114.86768,146.67612400000002,176.14136000000002,122.44094,154.48504,71.33155,203.68330999999998,235.0629,216.03629,242.90472400000002,213.976,162.0275,349.0727,216.07030000000003,187.048,216.029,371.9946,367.71019999999993,265.0642,53.015,107.024]},"chPais":{"opciones":["2026","2025","2024","2023","2022","2021"],"series":{"2021":{"labels":["Estados Unidos","Brasil","Chile","Canada","Francia","Espana","Republica Checa","Alemania"],"valores":[774762.1211400009,95772.664244,25561.262898,234.229,121.882,25.36,21.36,8.24]},"2022":{"labels":["Estados Unidos","Brasil","Chile","Francia","Canada","Republica Checa"],"valores":[743083.8676150006,124942.67535300003,26590.326590000008,194.166,97.352,9.6]},"2023":{"labels":["Estados Unidos","Brasil","Chile","Canada","Francia","Belgica","China","Espana"],"valores":[792250.1554439995,175787.013567,24447.666006,323.76364,79.31,27,27,19.04]},"2024":{"labels":["Estados Unidos","Brasil","Chile","Canada","Francia","Argentina","Polonia","Espana"],"valores":[785202.4743429997,197233.768495,22616.986506999998,247.156,126.819,106.99,51.03,36.92]},"2025":{"labels":["Estados Unidos","Brasil","Chile","Francia","Canada","Reino Unido","Espana","Paises Bajos"],"valores":[748030.2810230001,247433.508128,23011.185604000006,111.908,86.93,54,48.318,47.1]},"2026":{"labels":["Estados Unidos","Brasil","Chile","Canada","Reino Unido","Paises Bajos","Uruguay","Francia"],"valores":[493604.1276769989,146689.11829999997,13990.234612,115.637,81,80.892,27,16.112]}}},"chDetVolumen":{"labels":["Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"opciones":["Pierna y Muslo","Pechuga Deshuesada","Alas","Pollo Entero","Trozos y Despojos"],"series":{"Pierna y Muslo":{"Estados Unidos":[31795.6855770001,32100.3359890001,36389.3047420001,31038.626989000102,33929.5333980001,32095.077837000103,28775.3163140001,33261.3081680002,34283.9014490001,36369.802621,36773.2792310001,37725.2627980001,36714.0663320001,36626.004795999994,36659.655802,31880.2147020001,35639.3295110001,36249.255189999996,31279.9271360001,35663.218698000106,32751.5658040001,35062.1863610001,34498.53532,37152.693674,35196.764728,34684.2266770001,31521.798558,35853.476740000006,35523.038992,29045.635090999996,34091.2595900001,32825.688986000096,32057.987071000098,33450.166012000096,30953.5975820001,31415.2032920001,37150.219229,29544.2157010001,30105.324666000102,30927.8264090001,32730.0020200001,32667.9065450001,33051.421681,29535.563791000102,30626.220275,32163.3185280001,28727.923765,29930.834895000102,29611.774808,30742.081465,30309.333189,27614.002459,30272.299065000003,29578.289598,30968.411869000098,28736.262234],"Brasil":[null,null,null,null,null,null,null,null,null,null,216,27,null,null,null,null,null,0.015,null,null,54,27,null,null,null,null,null,null,108,81.015,108,162,27,54,215.715,160.68,null,27,54,243,269.325,123.003,80.865,270,242.778,336,280.035,81,74.335,null,134.82,0.06,52.5,52.41,54,135],"Chile":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Pechuga Deshuesada":{"Estados Unidos":[3955.961952,3207.910003,2999.0665240000003,1605.77924,1900.885726,2354.225943,2260.2815269999996,2447.791852,3328.2623080000003,7291.70972,7729.893730000001,8584.592188999999,6551.6876330000005,5809.012232,4902.292258999991,3719.718923,4025.861085,5530.732562,5799.783737,5928.494383,5253.161682,7716.14353799999,8095.52750099999,8359.678568,7561.383764,7670.478348000001,5253.916789,5551.110456,6373.651236,5521.249675,5982.088876,6277.813733,5993.254245,9109.38484799999,7305.903865,5791.041499999989,4814.726438,5027.918739,3947.1151069999996,2909.876346,2418.651676,3880.884327,3896.737655,3764.783409,4648.637593,6279.460765,5253.478655,3699.589709,3686.010977,4222.363551,3969.1085780000003,3408.31436,3716.806323,5141.504577,6363.36574499999,5541.531986],"Brasil":[242.55,2322,10847.115,13971.765,10457.025,9874.495,6020.115,14698.334902,7377.945,10430.5245,5152.49972,3525.225,7070.355,8954.73,16510.98,18611.951,12150.0405,5644.02,5948.055,10723.335,7861.048,15726.2465,17146.047,16893.01,1535.332,2265.4455,4935.3335,10495.508,12970.473,13135.174,18825.3905,16115.9325,5134.905,12614.502,24046.0535,31998.535,11256.9895,7167.4955,17074.4515,14806.583,14683.58,11109.8015,10157.861,25315.465,30700.8935,29792.75,18466.6495,11379.58263,6617.2715,7587.591,11807.9201,19344.457,16984.0385,18458.6895,18523.4655,14142.2345],"Chile":[1625.649,1727.48,1308.45304,2098.14,1277.2240800000002,2692.956,1435.8583999999998,2392.31294,2445.07304,1343.7225600000002,1442.7253999999998,712.5284,1858.1263999999999,1531.55376,1703.93152,412.188,330.564,470.994,684.754,2034.023,2378.56872,2010.99296,1117.39048,720.691736,779.06223,1145.04504,1242.717956,1237.2846399999999,1343.17516,947.82228,2039.81738,1429.117984,1485.909696,1530.34124,990.6384,1448.681456,1422.548396,1645.5041999999999,1316.198336,1280.83574,1184.667824,1547.07886,1322.660228,1435.347158,1066.634344,919.936316,1050.156776,1400.7081759999999,2057.313912,851.743688,1392.3393119999998,666.5460400000001,740.0019599999999,1112.91492,1977.5705360000002,1880.640364]},"Alas":{"Estados Unidos":[796.709267,1050.945808,879.815381,664.4583789999999,693.069674,759.9937020000001,537.109701,891.6132739999999,810.23536,970.6138149999999,1352.475362,1200.814141,1278.87948,1466.580175,1346.6282150000002,1453.913558,1469.747081,1483.947088,1561.143843,1495.0425149999999,1221.443489,904.1795940000001,1082.879492,905.174953,1048.3593329999999,1104.838702,1045.136696,947.8053669999999,958.480833,762.8928370000001,877.8907539999999,807.740687,1046.155264,760.663716,825.805881,972.9003739999999,814.223868,1118.846531,1079.177394,1437.450718,1255.990096,1383.930713,1099.5157379999998,923.552975,771.8606110000001,979.745528,772.316964,1169.903628,1128.1137649999998,1017.3097560000001,945.6193390000001,981.052651,1176.677021,1191.951611,1266.652341,1176.719614],"Brasil":[108,297,944.595,971.28304,1018.93576,377.85,296.475,450.975,647.97,836.445,1179.195,709.70104,728.37848,593.93196,1632.82728,1782.76728,1725.79316,621.00392,1128.68776,1888.053,1299.48,1614.6212,1664.61076,1287.63088,214.98695999999998,403.94196,703.3365200000001,1916.74568,2754.54716,2567.785355,2917.7736400000003,3556.46092,1159.72396,2168.4462000000003,4031.04592,3486.6806,362.35652000000005,959.17804,2008.6922,2581.54576,1848.2993600000002,1428.5920800000001,1313.87576,3094.17152,3540.05428,2869.55192,2652.04896,2510.2480800000003,810.2746800000001,834.13404,2331.7134,3325.93844,2813.232,3473.90444,2508.7,1914.17492],"Chile":[185.934,183.309,79.087,124.907,157.767,206.75342,78.55,218.39463,229.50171,184.11384,339.80902000000003,226.122,398.64678999999995,372.67091999999997,242.00891000000001,68.23,113.9,null,96.741,305.19,366.84438,376.55906,467.26733,655.61732,333.6907,231.1716,323.10837,500.49751000000003,513.28443,177.55594,620.0461899999999,385.48395,425.35134999999997,405.93449,279.88326,484.5315,703.642,458.31589,649.09611,556.703,441.12953999999996,594.97164,512.74199,540.03889,423.31938,202.984,155.862,233.994,347.392,395.346,429.267,158.993,249.648,455.568,501.201,414.222]},"Pollo Entero":{"Estados Unidos":[470.768266,983.67943,727.429658,282.333083,244.58995000000002,282.521163,292.068785,275.52948200000003,137.340229,107.420939,286.627822,136.70845300000002,513.435617,693.077151,505.40185499999995,269.712055,157.88818700000002,131.549109,470.660717,181.898688,97.343784,200.471789,139.533668,165.484917,223.21751999999998,303.99983299999997,382.659689,279.64886099999995,347.910795,240.13729999999998,813.491595,439.61587,331.669509,183.745463,651.970447,238.666481,575.804988,498.786162,356.923808,393.32069,1137.737147,719.4009980000001,225.923963,163.428143,426.491325,395.779338,261.901698,174.96518400000002,233.985123,182.555231,223.388222,109.428678,266.117364,169.99495000000002,309.649771,399.31309600000003],"Brasil":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.016,null,null,0.016,null,null,null,null,null,27.001,80.379,26.988,135.005,189.007,53.9924,80.9886,26.9808,null,null,null,null,null,null,null,null,null],"Chile":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,44.562839999999994,44.1765,66.52333999999999,154.40856,132.89882,22.7298,null,null,null,null,null,null,null,null,null,null,null,null]},"Trozos y Despojos":{"Estados Unidos":[518.898871,387.0964,622.3714570000001,593.7747830000001,602.237375,800.098964,682.9885919999999,644.0412299999999,485.153842,539.1781550000001,405.80684499999995,646.040256,555.2055600000001,745.083,897.128496,697.890816,631.156576,940.151532,759.630343,847.835247,515.108162,837.232258,544.171006,441.80233000000004,988.955298,755.2687709999999,614.561792,680.834025,956.093674,839.870384,1062.887739,1010.691019,921.931972,920.2435330000001,578.709746,506.164881,644.757446,697.2854629999999,884.595164,861.685421,769.59502,722.5223739999999,686.2697169999999,684.220138,627.0305699999999,601.333444,448.056948,503.8258,572.7605940000001,794.726443,774.3513360000001,757.186557,721.967074,822.974392,1588.786534,1448.849524],"Brasil":[null,null,null,null,null,null,null,null,null,27,27,null,null,null,null,null,null,0.012,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,134.97,null,null,80.985,null,108,27,53.94,53.325,134.91,108,108,79.875,null,27,27,null,81,81,81,108],"Chile":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,24.5,null,null,null,null,null,22.08991,65.6773,65.7849,66.01068,66.33247,22.01439,null,43.95273,21.887150000000002,null,null,null,null,null,null,null,null,null]}}},"chDetPrecio":{"labels":["Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26"],"opciones":["Pierna y Muslo","Pechuga Deshuesada","Alas","Pollo Entero","Trozos y Despojos"],"series":{"Pierna y Muslo":{"Estados Unidos":[0.9125891607321296,0.8633966669783293,0.9472280379901468,1.0609214041431803,1.2397084636071092,1.4129635919848993,1.3026107217320497,1.1988286964991948,1.024017631716046,0.757993095989285,0.7569894065625633,0.7493101780842955,0.7362634198883193,0.8428884077560668,1.0124124366563167,1.145645962343293,1.1772720243061248,1.1410716745897036,1.032230546825133,0.9913624387996708,1.0279842472922764,0.9939713784474115,0.986181974035514,1.0477507739472391,1.0790720566968328,1.101865906843133,1.1455015768397643,1.1971943691028273,1.2335052149975807,1.2173022884876261,1.192234018284787,1.2027174067196678,1.196635437690472,1.1607074762341327,1.1494106161390616,1.175852078363494,1.262214017872936,1.2415339642236447,1.2289465817259282,1.2345965071546934,1.2694263040571414,1.300329649512424,1.3092685974670857,1.2969721095581157,1.254443059308209,1.163052333963413,1.093591581152231,1.1052158468109679,1.1820241570375007,1.2344320146242642,1.2323320415082888,1.2582276932083836,1.2933440807995367,1.3039990937159598,1.2578466469476601,1.2124812639419102],"Brasil":[null,null,null,null,null,null,null,null,null,null,1.6992791327913286,1.597822899041174,null,null,null,null,null,null,null,null,2.0800004450914815,2.080000177633733,null,null,null,null,null,null,1.9750005555092964,2.0597523421322963,1.635000190418963,2.109999903515636,1.900000387758574,2.054999900725926,2.072463510814088,2.0715981865560615,null,1.8999994728030927,1.9810001943490556,2.1036580117707326,2.180012323719859,2.1861889884032584,2.2400661644871205,2.067776964906585,2.2835009453574786,2.195618955946027,2.1202938672886713,2.28333279417242,2.295225681059313,null,1.5094789548338896,null,2.2035712319257525,2.1409267994844687,2.5500003554470556,2.286000205499059],"Chile":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]},"Pechuga Deshuesada":{"Estados Unidos":[4.318655966773362,4.727544255762651,5.110680828003467,5.006507999154928,5.191635295004856,5.332621997703175,4.805198548012954,3.9214827236009935,3.3203118899204562,2.3014300915172607,2.0164665335791363,1.9985946195670126,2.1027562029897986,2.467541596253416,2.6433642896887775,2.558350052414291,2.660765780102395,2.3866371884403184,2.14882105129771,2.3171344066076176,2.556732120952907,2.1659565723024294,2.0935649860968115,2.1081704906996968,2.423006167372356,2.6427205965636085,3.0450355214256133,3.4659026815522256,3.4547192289849673,3.4111840322849374,3.569653229327531,3.600641763030706,3.5998318958327786,3.18809951533967,3.21753027529617,3.0368192799212768,3.1372828387245124,3.3237389521273446,3.9000585692998895,3.913092029449041,4.533797656015227,3.957182759056297,3.5927029534086765,3.5390574932512404,2.996329775548132,2.6127430580834754,2.567139699299663,2.63170081402564,2.728160192364913,2.9638617098607103,3.0253019871390876,3.1029787265477182,3.0706848460499674,2.9409624643183507,2.8701075197201678,2.77368178125041],"Brasil":[2.099139850556413,2.5582869415960894,2.878260763971167,3.055443477364034,3.012998672969865,2.8752081423865326,3.4596839226250493,3.4279262259385885,3.5999124917406,3.129686528223715,2.7377866229126164,2.5416524507969362,2.0840096707804485,2.0523148402110056,2.1422853896993943,2.2427641839023806,2.399159809648692,2.448604715590235,2.2568663178400334,2.125371563109564,2.1591671815047433,2.2563085344012,2.52981302706814,2.5960693701098445,2.56576689158143,2.5226229470720307,2.722134702254731,2.8820696292852044,3.008784732032926,3.134715340556288,3.170831540695392,3.228052504277764,3.2179408668898644,3.1668515827553714,3.1715447813468187,3.1776414211280923,3.0697801251086982,3.099425542681527,3.0668053470366705,3.075178667164193,3.0170266406251334,3.0733095979944376,3.06784304152703,3.0367605279718823,2.968674919611375,2.8338931254596402,2.79595023651716,2.842930821099227,2.810178189107474,2.6683399675803297,2.546539833935682,2.4842080087830016,2.452731689805349,2.5126183365747985,2.588139212670739,2.6297480394460435],"Chile":[4.579131194380011,3.953998578204622,3.8907066643741297,4.197603226957982,4.181342750760532,4.590795277465246,4.361816537661799,4.126578389514576,3.777387856147164,3.1799096243012843,2.927216560356122,2.8205209335570482,2.9755115677917012,3.1582182242275647,3.139882680591618,3.1286679061453513,3.4316660897467055,3.2679007036177956,3.395076266584569,3.402362444750777,3.4765845012371765,3.468038327061856,3.689598710323172,3.490721939324943,3.4610756253246677,2.8898451211207203,3.0536218657648093,3.2621050695650116,3.441023947349592,3.4546604661789972,3.4757632850128526,3.415752447887368,3.449752204392036,3.570356681198881,3.5050015219853985,3.6274087005520625,3.5648349732289746,3.5586674040612176,3.707293763343597,3.8189788290529743,4.450131473414373,4.5189326658040425,4.616549530690282,4.4276600508190365,3.732467858714017,3.5961102595851755,3.3468034872440797,3.1799647586191218,4.6316816557970375,3.52367848517161,3.461344734294172,3.478014144067498,4.128459502594845,4.313595496059897,4.129687534012435,4.749089558487745]},"Alas":{"Estados Unidos":[1.8890536841691714,1.5954408834755256,1.4272149798080875,1.334890338543313,1.3750764276943546,1.4394581083868638,1.4793949500846644,1.4282690895302328,1.4490200591346445,1.1590118354077723,1.129652577603022,1.0935058308435344,1.043122507912411,1.1640540599500875,1.4184832430987122,1.1697037866692896,1.2416770160192616,1.2156756630154526,1.3291011054519208,1.291007173943358,1.4820236363979096,1.8290398379128758,1.603518243977133,1.4423573030333177,1.5870283897687398,1.5284886055731146,1.588025194647189,1.6162236765637876,1.617725308295153,1.6104314843929777,1.8567290801735339,1.6133591061046304,1.6866923431002017,1.6836025767570197,1.843862417812837,1.731936997871007,1.6987790455829035,1.6545726711104403,1.7072227058704492,1.815113246515878,1.6604659542241407,1.5206473001134633,1.494810699953319,1.4827157333197483,1.4032720094353408,1.3576959250218799,1.170318001247766,1.1084160449222147,1.698697489960164,1.3334672003505585,1.3058306111369407,1.365415530781171,1.2305162813297092,1.2424522461223555,1.6287390438320202,1.3415987130833615],"Brasil":[1.8252603966443426,1.8995294939369294,1.9368631210206173,2.338451837391673,2.2411284857096683,2.058389445328551,2.2941142290021115,2.363526226243805,2.125769557746115,2.123721266473492,1.9937597194501333,2.022409299351231,2.163553787074709,1.9929342372291434,2.061001197948432,2.0444479347667746,2.086006966868133,2.158912775587149,2.0190201935496934,2.089036449085174,2.1326286965758223,2.0606843325626656,2.0904917275226493,2.120106449396818,1.959225485512168,2.212089015827261,2.260654429247894,2.266643591667211,2.2303956043134834,2.165455251195079,2.0439683733000993,2.0695240639976134,2.1700131211715505,2.088435514649545,2.0481704534628173,2.0166046405934543,2.072716973994377,1.9844722987292327,2.1487753495114084,2.2247827572991,2.2364452702067266,2.106095876465226,2.0516140813198804,1.971858511488762,1.8636225055946347,1.8581082254772723,1.8504819002576633,1.881196999671698,1.8971169093787184,1.9492046867769954,1.9364052889462318,1.9076273910075137,1.8775135540789774,1.9163653945006185,1.9256464487875753,1.846897358488335],"Chile":[4.011521878431056,4.025238001096073,3.6609939854699634,3.5484908468048793,3.4644360921878152,3.4616061511553813,3.3849725129281225,2.7391578922719395,2.457239357586573,2.374406201954204,2.013869375686072,1.949572138848144,1.9634302695153873,1.7785898476562405,1.7111483752481138,1.900000023120973,2.2603380068323267,null,2.923342578982076,2.05345221170309,1.7793223290431952,1.832258407297222,2.3903179268512953,2.3483800575638547,2.374212452283276,1.6763619776934666,1.9491726738517574,2.0547785121638467,1.9545344215596019,1.7401078494496607,1.5554593179750593,2.2734006265397846,2.2252203704711975,1.9271278144775799,1.7967695989720498,2.4492683951874747,1.9360544100774257,1.8527065833148595,1.7829253249759731,2.023747486692743,2.3222477525651763,2.096892848513687,2.376073349720802,2.11029268121944,1.684639952009811,2.018926696907924,1.4689852023877341,1.9566780997073856,2.0998731742430365,2.3506044365077727,2.3740780459620936,2.3656836520255102,2.4697862472001457,2.9951338398606793,3.1189880113094546,2.5884845623402915]},"Pollo Entero":{"Estados Unidos":[1.330161707436784,1.2573906416863163,0.8287816517594915,0.9894840724462461,1.069271174322657,1.1624280445091508,1.4318260399040692,1.3001993259273865,1.0668818438853704,1.3888945031125821,1.2601648328716988,0.9198461180270762,1.4817857687482128,1.6806223698851819,1.6715184485251384,1.9315643197580694,1.5264828249304048,0.9980408551986923,1.4638747642175223,1.4451484440994538,1.6060617804061736,1.6373484887090521,1.368446717333504,1.0161462579826657,1.4592486931604562,1.294348660329353,1.746799446616913,1.5563191427840288,1.6565972975734025,1.7134515091726776,1.9370827003555704,1.4842811610594062,1.2555085811803761,1.2337431808294825,1.3325922269783295,1.3010133910883197,1.4819449033638243,1.6114772218645852,1.0944749433791847,1.4542576499721713,2.26922643688285,1.8683108877428607,1.4898944358119022,1.1376476198721783,1.0137969639486641,0.747059329480866,0.8336202937952506,1.006407656069347,1.0754606265281448,1.3046612219335527,1.2962223601559308,1.228961472216963,2.031808874171446,1.2850593246043778,1.0495648529419968,1.3681773122080274],"Brasil":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,2.108742984750735,2.1002041606438873,2.0552943447730287,2.0685361830607314,2.0354727483148403,2.0057280536123048,1.9964965848543743,1.8832814191514633,null,null,null,null,null,null,null,null,null],"Chile":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,1.2271087842402213,1.425042846495114,1.4705721112475532,0.8868659985002061,0.6826233445937879,0.4619063334778837,null,null,null,null,null,null,null,null,null,null,null,null]},"Trozos y Despojos":{"Estados Unidos":[1.1977835632975062,1.0576378811532656,1.1629566133953488,1.6921678346535978,1.206531004626068,1.2759655672222316,1.100017241396527,1.1269325147870408,0.8707010996324832,0.9916590472017175,0.9337751102993519,1.0252427300091496,0.9986598250002268,1.1638783803819763,1.254347243608122,1.1529712087986381,1.0585683347466763,1.1196966470465957,1.1613046857100482,1.1374582342848871,1.1909964409667304,1.098436582121124,1.0877622366659774,1.0499224362098496,1.1708497302235699,1.0153395261383873,1.0083095188661941,1.0031530730609255,0.96983525554108,0.9870926849329241,0.9575267087197814,0.9373873469470189,0.9972640721422699,1.104738284301662,1.0815361407893584,1.0168197598808777,0.9929497032247084,0.9312108357147868,1.0285566517337619,1.110214196958009,0.9261994648153141,1.0518692140263854,0.8924538743148971,0.899841486497904,0.9731932121598618,1.0063834661469386,0.9917368723552034,0.9840539220361046,0.9262985820404257,0.9719040859951958,0.9918407954722557,0.9238012911783918,0.9727839422034265,1.1248972606005425,1.567451667402356,1.6757042278201626],"Brasil":[null,null,null,null,null,null,null,null,null,1.401448148148148,1.401448148148148,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.5500002053772809,null,null,0.5499994317861802,null,0.5499999502571389,0.5500001347935703,0.5500008608788506,0.5500003704862916,0.5499998200286524,0.5700003795377019,0.9425000455720648,1.06662010015374,null,2.100000560768548,2.1000002095210553,null,0.6599997471396247,0.7499993222439444,0.7200007343541445,1.089999754186565],"Chile":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,0.5181712787942938,null,null,null,null,null,1.369808478989199,1.320475039646208,1.2555539719970041,1.13503272659195,1.036660972216566,1.2506428784159862,null,0.9187177801017251,0.5560824889849797,null,null,null,null,null,null,null,null,null]}}},"chPolloHuevo":{"labels":["Ene 00","Feb 00","Mar 00","Abr 00","May 00","Jun 00","Jul 00","Ago 00","Sep 00","Oct 00","Nov 00","Dic 00","Ene 01","Feb 01","Mar 01","Abr 01","May 01","Jun 01","Jul 01","Ago 01","Sep 01","Oct 01","Nov 01","Dic 01","Ene 02","Feb 02","Mar 02","Abr 02","May 02","Jun 02","Jul 02","Ago 02","Sep 02","Oct 02","Nov 02","Dic 02","Ene 03","Feb 03","Mar 03","Abr 03","May 03","Jun 03","Jul 03","Ago 03","Sep 03","Oct 03","Nov 03","Dic 03","Ene 04","Feb 04","Mar 04","Abr 04","May 04","Jun 04","Jul 04","Ago 04","Sep 04","Oct 04","Nov 04","Dic 04","Ene 05","Feb 05","Mar 05","Abr 05","May 05","Jun 05","Jul 05","Ago 05","Sep 05","Oct 05","Nov 05","Dic 05","Ene 06","Feb 06","Mar 06","Abr 06","May 06","Jun 06","Jul 06","Ago 06","Sep 06","Oct 06","Nov 06","Dic 06","Ene 07","Feb 07","Mar 07","Abr 07","May 07","Jun 07","Jul 07","Ago 07","Sep 07","Oct 07","Nov 07","Dic 07","Ene 08","Feb 08","Mar 08","Abr 08","May 08","Jun 08","Jul 08","Ago 08","Sep 08","Oct 08","Nov 08","Dic 08","Ene 09","Feb 09","Mar 09","Abr 09","May 09","Jun 09","Jul 09","Ago 09","Sep 09","Oct 09","Nov 09","Dic 09","Ene 10","Feb 10","Mar 10","Abr 10","May 10","Jun 10","Jul 10","Ago 10","Sep 10","Oct 10","Nov 10","Dic 10","Ene 11","Feb 11","Mar 11","Abr 11","May 11","Jun 11","Jul 11","Ago 11","Sep 11","Oct 11","Nov 11","Dic 11","Ene 12","Feb 12","Mar 12","Abr 12","May 12","Jun 12","Jul 12","Ago 12","Sep 12","Oct 12","Nov 12","Dic 12","Ene 13","Feb 13","Mar 13","Abr 13","May 13","Jun 13","Jul 13","Ago 13","Sep 13","Oct 13","Nov 13","Dic 13","Ene 14","Feb 14","Mar 14","Abr 14","May 14","Jun 14","Jul 14","Ago 14","Sep 14","Oct 14","Nov 14","Dic 14","Ene 15","Feb 15","Mar 15","Abr 15","May 15","Jun 15","Jul 15","Ago 15","Sep 15","Oct 15","Nov 15","Dic 15","Ene 16","Feb 16","Mar 16","Abr 16","May 16","Jun 16","Jul 16","Ago 16","Sep 16","Oct 16","Nov 16","Dic 16","Ene 17","Feb 17","Mar 17","Abr 17","May 17","Jun 17","Jul 17","Ago 17","Sep 17","Oct 17","Nov 17","Dic 17","Ene 18","Feb 18","Mar 18","Abr 18","May 18","Jun 18","Jul 18","Ago 18","Sep 18","Oct 18","Nov 18","Dic 18","Ene 19","Feb 19","Mar 19","Abr 19","May 19","Jun 19","Jul 19","Ago 19","Sep 19","Oct 19","Nov 19","Dic 19","Ene 20","Feb 20","Mar 20","Abr 20","May 20","Jun 20","Jul 20","Ago 20","Sep 20","Oct 20","Nov 20","Dic 20","Ene 21","Feb 21","Mar 21","Abr 21","May 21","Jun 21","Jul 21","Ago 21","Sep 21","Oct 21","Nov 21","Dic 21","Ene 22","Feb 22","Mar 22","Abr 22","May 22","Jun 22","Jul 22","Ago 22","Sep 22","Oct 22","Nov 22","Dic 22","Ene 23","Feb 23","Mar 23","Abr 23","May 23","Jun 23","Jul 23","Ago 23","Sep 23","Oct 23","Nov 23","Dic 23","Ene 24","Feb 24","Mar 24","Abr 24","May 24","Jun 24","Jul 24","Ago 24","Sep 24","Oct 24","Nov 24","Dic 24","Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26"],"pollo":[11.7386,13.029,12.5364,11.0139,13.545,13.8427,11.0457,7.1339,7.8576,7.3433,9.2825,11.0032,8.2577,9.4016,10.1086,12.17,13.5773,9.7762,9.3545,8.687,11.008,9.3778,8.7425,10.1205,9.1209,10.2021,10.0822,12.43,13.3605,12.264,11.8713,11.0818,10.4365,9.7317,9.555,10.629,13.1995,13.5,12.2575,10.138,14.0024,12.7057,10.3265,8.5624,8.6971,8.3657,9.6574,10.5595,11.3162,12.3763,12.6996,11.795,12,14.7932,15.0355,13.8136,10.8105,9.9438,11.6495,14.673,14.2448,13.5035,11.9105,13.0038,16.1832,16.5795,17.6176,14.0574,7.8143,7.0529,7.963,11.5641,11.5909,14.4505,13.0014,10.385,15.5118,10.9,10.21,10.5578,12.5767,12.9109,12.113,13.85,12.1659,11.8942,10.3948,15.1805,16.4005,15.7876,16.4482,14.9805,11.8585,9.5791,11.246,13.8925,14.38,13.47,14.62,15.81,18.08,13.54,11.06,10,13.58,14.86,14.99,16.82,19.41,19.76,19.1,17.65,19.31,17.84,15.32,12.97,14.36,12.29,12.58,14.79,15.86,16.22,16.17,16.77,18.73,17.84,18.9,18.87,17.73,17.19,14.78,16.88,18.9576,16.0274,14.6123,16.5663,18.3536,20.0782,19.669,15.4639,15.181,15.101,16.7,19.3214,21.2429,20.8374,17.3368,17.6021,18.7532,19.8981,20.8682,19.0617,23.0265,21.3279,20.0536,20.025,22.75,21.62,23.66,25.72,28.32,25.29,19.05,16.57,15.63,14.25,17.75,20.31,22.12,21.74,20.74,23.84,29.88,16.25,20.57,24.87,23.9019,16.0183,18.07,20.895,24.22,19.17,20.99,24.09,20.46,20.84,22.52,16.84,17.92,14.45,19.18,18.52,18.24,16.99,21.19,26.58,27.64,24.14,21.05,19.34,23.71,20.78,24.37,21.8514,20.31,20.04,24.53,27.43,28.33,28.06,24.42,20.74,17.64,15.44,21.38,19.6785,24.5555,26.76,27.55,24.64,30.94,26.96,17.62,18.14,19.1,19.67,23.46,21.221,20.52,18.92,19.61,27.77,30.38,33.8,31.92,16.1,21.17,19.85,22.12,18.7581,14.91,20.31,24.31,18.84,20.16,31.44,30.09,26.86,29.64,25.41,29.81,30.1227,35.27,37.27,33.99,34.72,35.13,31.04,33.13,30.98,25.73,22.18,31.94,32.3878,36.88,39.34,39.52,41.04,42.4,42.42,31.41,30.46,33.45,30.15,30.57,27.4623,35.58,38.24,35.23,41.21,36.89,35.64,37.4,35.3772,29.23,22.31,24.64,25.29,25.4,24.65,39.8,37,42.54,43.51,39.67,27.88,26.27,25.36,29.71,35.79,36.45,35.82,33.58,36.91,49.44,44.12,34.69,25.11,32.07,26.2,26.63,23.91,23.5,26,31.79,19.24,34.19,27.01,28.5],"huevo":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,19.87,21.37,23.82,25.45,25.89,21.03,21.0487,22.86,20.47,21.89,22.32,21.47,20.9714,23.01,21.88,22.42,23.36,20.42,18.933,20.3,19.4933,20.7787,23.3211,25.7109,26.66,27.75,28.53,24.32,16.03,17.64,15.65,16.83,16.1,17.48,15.18,15.45,15.02,20.25,17.71,18.1,13.91,12.62,12.22,13.92,15.63,14.05,15.04,17.6018,15.54,17.1,15.16,15.38,18.48,15.3,17.01,19.28,19.5,20.16,21.44,24.571,25.88,27.43,25.8,21.85,15.86,14.17,15.48,16.83,17.66,19.23,21.05,21.78,21.2,24.51,22,22,20.73,18.04,20.68,23.38,23.11,25.46,27.19,23.68,24.05,27.75,29.67,30.67,24.18,24.07,24.49,21.99,21.5,24.75,27.5,28.55,24.64,27.8,30.58,28.34,25.96,23.58,24.63,22.68,26.08,26.92,26.38,26.06,28.03,30,33.14,31.36,32.66,34.32,36.11,34.45,36.65,36.68,36.19,34.12,37.06,40.54,39.15,40.53,31.83,26.56,26.12,30.81,30.37,33.97,35.73,31.62,29.28,31.08,28.09,35.57,31.95,32.44,34.82,38.63,36.5,38.16,36.1,34.16,32.25,38.63,34.14,31.12,33.42,32.35,39.64,33.19,33.54,31.39,30.66,24.17,21.34,22.62,23.16,21.3,16.75,18.41,20.18]},"chFocosMes":{"labels":["Ene 25","Feb 25","Mar 25","Abr 25","May 25","Jun 25","Jul 25","Ago 25","Sep 25","Oct 25","Nov 25","Dic 25","Ene 26","Feb 26","Mar 26","Abr 26","May 26","Jun 26","Jul 26","Ago 26","Sep 26"],"United States of America":[182,114,66,18,11,3,0,7,41,65,121,90,58,71,64,13,22,7,2,10,10],"Canada":[20,3,5,6,4,3,8,0,9,42,35,15,10,5,0,5,5,0,0,0,4],"Peru":[7,7,3,3,2,1,1,1,0,0,2,1,1,4,11,20,20,14,27,9,2],"Chile":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,19,9,2,0,2,1],"Mexico":[3,4,0,14,1,1,0,0,2,0,3,0,3,0,2,2,1,3,1,0,0],"otros":[1,2,0,3,7,6,10,5,0,1,4,6,1,14,17,2,1,8,6,1,3]},"chTipoUnidad":{"labels":["Aves de producción","Doméstica o traspatio","Fauna silvestre"],"focos":[749,549,183]},"chAvesTipo":{"labels":["Aves de producción","Doméstica o traspatio","Fauna silvestre"],"aves":[85654487,32357,2670]}};
+Chart.defaults.font.family = "'Poppins','Montserrat','Segoe UI',system-ui,sans-serif";
+Chart.defaults.font.size = 11.5;
+Chart.defaults.color = '#5a6478';
+Chart.defaults.plugins.legend.labels.boxWidth = 12;
+Chart.defaults.plugins.legend.labels.boxHeight = 12;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.tooltip.backgroundColor = '#06254B';
+Chart.defaults.plugins.tooltip.padding = 10;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+Chart.defaults.maintainAspectRatio = false;
+const fmt = (v, d = 0) => v === null || v === undefined ? '—' : Number(v).toLocaleString('es-MX', {minimumFractionDigits: d, maximumFractionDigits: d});
+const fmtC = (v) => { if (v === null || v === undefined) return '—'; const a = Math.abs(v);
+  if (a >= 1e9) return (v/1e9).toFixed(2)+' MM'; if (a >= 1e6) return (v/1e6).toFixed(1)+' M';
+  if (a >= 1e3) return (v/1e3).toFixed(0)+' mil'; return fmt(v); };
+const ejeMoneda = { ticks: { callback: (v) => '$' + fmt(v, 0) } };
+const ejeCompacto = { ticks: { callback: (v) => fmtC(v) } };
+(() => { const D = DATOS.chPrecios;
+  new Chart(document.getElementById("chPrecios"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "Pollo en granja",
+      data: D["Granja"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Pollo vivo en andén",
+      data: D["Andén/Pie"],
+      borderColor: "#F8D227",
+      backgroundColor: "#F8D22722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Rosticero seco",
+      data: D["Mercado Público"],
+      borderColor: "#0EA5E9",
+      backgroundColor: "#0EA5E922",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Rosticero comercial",
+      data: D["Rosticero"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + '$' + fmt(c.parsed.y, 2) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Pesos por kilogramo" }, ...(ejeMoneda) } }
+    }
+  }); })();
+(() => { const D = DATOS.chPm12;
+  new Chart(document.getElementById("chPm12"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "Pollo en granja",
+      data: D["Granja"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Pollo vivo en andén",
+      data: D["Andén/Pie"],
+      borderColor: "#F8D227",
+      backgroundColor: "#F8D22722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Rosticero seco",
+      data: D["Mercado Público"],
+      borderColor: "#0EA5E9",
+      backgroundColor: "#0EA5E922",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Rosticero comercial",
+      data: D["Rosticero"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + '$' + fmt(c.parsed.y, 2) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Pesos por kilogramo" }, ...(ejeMoneda) } }
+    }
+  }); })();
+(() => { const D = DATOS.chYoy;
+  new Chart(document.getElementById("chYoy"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "Pollo en granja",
+      data: D["Granja"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Pollo vivo en andén",
+      data: D["Andén/Pie"],
+      borderColor: "#F8D227",
+      backgroundColor: "#F8D22722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Rosticero seco",
+      data: D["Mercado Público"],
+      borderColor: "#0EA5E9",
+      backgroundColor: "#0EA5E922",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Rosticero comercial",
+      data: D["Rosticero"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmt(c.parsed.y, 1) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Variación %" }, ...({}) } }
+    }
+  }); })();
+(() => { const D = DATOS.chAnual;
+  new Chart(document.getElementById("chAnual"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "2022",
+      data: D["a2022"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2023",
+      data: D["a2023"],
+      borderColor: "#F8D227",
+      backgroundColor: "#F8D22722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2024",
+      data: D["a2024"],
+      borderColor: "#0EA5E9",
+      backgroundColor: "#0EA5E922",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2025",
+      data: D["a2025"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2026",
+      data: D["a2026"],
+      borderColor: "#C8A84B",
+      backgroundColor: "#C8A84B22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + '$' + fmt(c.parsed.y, 2) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Pesos por kilogramo" }, ...(ejeMoneda) } }
+    }
+  }); })();
+(() => { const D = DATOS.chReproductoras;
+  new Chart(document.getElementById("chReproductoras"), {
+    data: { labels: D["labels"], datasets: [{ type: 'bar', label: "Reproductoras vendidas", data: D["valores"], backgroundColor: "#03488D", borderRadius: 4, yAxisID: 'y', order: 5 },{ type: 'line', label: "Promedio móvil 12 meses", data: D["pm12"], borderColor: "#F8D227", backgroundColor: "#F8D227", borderWidth: 3.2, borderDash: [], pointRadius: 0, pointHoverRadius: 5, tension: .3, spanGaps: true, yAxisID: "y", order: 1, borderJoinStyle: 'round', borderCapStyle: 'round' }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom',
+        // El 'order' de los datasets altera tambien el orden de la leyenda;
+        // se reordena por indice para conservar el orden de declaracion.
+        labels: { sort: (a, b) => a.datasetIndex - b.datasetIndex } } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { position: 'left', grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Cabezas" }, ...ejeCompacto },
+        y1: { display: false, position: 'right', grid: { display: false }, title: { display: false, text: "" } }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chRepAnual;
+  new Chart(document.getElementById("chRepAnual"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "2022",
+      data: D["a2022"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2023",
+      data: D["a2023"],
+      borderColor: "#F8D227",
+      backgroundColor: "#F8D22722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2024",
+      data: D["a2024"],
+      borderColor: "#0EA5E9",
+      backgroundColor: "#0EA5E922",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2025",
+      data: D["a2025"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "2026",
+      data: D["a2026"],
+      borderColor: "#C8A84B",
+      backgroundColor: "#C8A84B22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.y) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Cabezas por mes" }, ...(ejeCompacto) } }
+    }
+  }); })();
+(() => { const D = DATOS.chProduccion;
+  new Chart(document.getElementById("chProduccion"), {
+    data: { labels: D["labels"], datasets: [{ type: 'bar', label: "Producción de carne (t)", data: D["toneladas"], backgroundColor: "#03488D", borderRadius: 4, yAxisID: 'y', order: 5 },{ type: 'line', label: "Consumo per cápita (kg/hab)", data: D["percapita"], borderColor: "#F8D227", backgroundColor: "#F8D227", borderWidth: 3.2, borderDash: [], pointRadius: 0, pointHoverRadius: 5, tension: .3, spanGaps: true, yAxisID: "y1", order: 1, borderJoinStyle: 'round', borderCapStyle: 'round' }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom',
+        // El 'order' de los datasets altera tambien el orden de la leyenda;
+        // se reordena por indice para conservar el orden de declaracion.
+        labels: { sort: (a, b) => a.datasetIndex - b.datasetIndex } } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { position: 'left', grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Toneladas" }, ...ejeCompacto },
+        y1: { display: true, position: 'right', grid: { display: false }, title: { display: true, text: "kg/hab" } }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chTrade;
+  new Chart(document.getElementById("chTrade"), {
+    data: { labels: D["labels"], datasets: [{ type: 'bar', label: "Importación (t)", data: D["imp"], backgroundColor: "#03488D", borderRadius: 4, yAxisID: 'y', order: 5 },{ type: 'line', label: "Precio implícito de importación (USD/kg)", data: D["precio"], borderColor: "#F8D227", backgroundColor: "#F8D227", borderWidth: 3.2, borderDash: [], pointRadius: 0, pointHoverRadius: 5, tension: .3, spanGaps: true, yAxisID: "y1", order: 1, borderJoinStyle: 'round', borderCapStyle: 'round' }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom',
+        // El 'order' de los datasets altera tambien el orden de la leyenda;
+        // se reordena por indice para conservar el orden de declaracion.
+        labels: { sort: (a, b) => a.datasetIndex - b.datasetIndex } } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { position: 'left', grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Toneladas" }, ...ejeCompacto },
+        y1: { display: true, position: 'right', grid: { display: false }, title: { display: true, text: "USD/kg" } }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chExport;
+  new Chart(document.getElementById("chExport"), {
+    type: 'bar',
+    data: { labels: D["labels"], datasets: [{
+      label: "Exportación (t)",
+      data: D["exp"],
+      backgroundColor: "#2e8b57",
+      borderRadius: 4,
+      borderSkipped: false
+    }] },
+    plugins: [],
+    options: {
+      indexAxis: "x",
+      layout: { padding: { right: 0 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.y) } } },
+      scales: {
+        x: { stacked: false, grid: { display: false }, title: { display: false, text: "Toneladas" }, ...({}) },
+        y: { stacked: false, grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Toneladas" }, ...(ejeCompacto) }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chPais;
+  let activa = D.opciones[0];
+  const ch = new Chart(document.getElementById("chPais"), {
+    type: 'bar',
+    data: { labels: D.series[activa].labels, datasets: [{
+      label: "Volumen importado (t)", data: D.series[activa].valores,
+      backgroundColor: "#03488D", borderRadius: 4, borderSkipped: false
+    }] },
+    plugins: [{ afterDatasetsDraw(ch2) {
+      const ctx = ch2.ctx; ctx.save();
+      ctx.font = '600 10px Poppins, system-ui, sans-serif';
+      ctx.fillStyle = '#5a6478'; ctx.textBaseline = 'middle';
+      ch2.getDatasetMeta(0).data.forEach((el, i) => {
+        const v = ch2.data.datasets[0].data[i];
+        if (v === null || v === undefined) return;
+        ctx.fillText(fmtC(v), el.x + 6, el.y);
+      });
+      ctx.restore();
+    } }],
+    options: {
+      indexAxis: 'y',
+      layout: { padding: { right: 54 } },
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.x) } } },
+      scales: {
+        x: { grid: { display: true }, title: { display: true, text: "Toneladas" }, ...ejeCompacto },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, ticks: { font: { size: 10 }, autoSkip: false } }
+      }
+    }
+  });
+  const cont = document.getElementById("ctrlPais");
+  const pintar = () => {
+    [...cont.querySelectorAll('button')].forEach((b) => b.classList.toggle('on', b.dataset.op === activa));
+  };
+  D.opciones.forEach((op) => {
+    const b = document.createElement('button');
+    b.textContent = op; b.dataset.op = op;
+    b.addEventListener('click', () => {
+      activa = op;
+      ch.data.labels = D.series[activa].labels;
+      ch.data.datasets[0].data = D.series[activa].valores;
+      ch.update();
+      pintar();
+    });
+    cont.appendChild(b);
+  });
+  pintar();
+  })();
+(() => { const D = DATOS.chDetVolumen;
+  let activa = D.opciones[0];
+  const fm = (v) => fmtC(v);
+  const ch = new Chart(document.getElementById("chDetVolumen"), {
+    type: 'line',
+    data: { labels: D.labels, datasets: [{
+      label: "Estados Unidos",
+      data: D.series[activa]["Estados Unidos"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 5,
+      tension: .3, spanGaps: true
+    },{
+      label: "Brasil",
+      data: D.series[activa]["Brasil"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 5,
+      tension: .3, spanGaps: true
+    },{
+      label: "Chile",
+      data: D.series[activa]["Chile"],
+      borderColor: "#0EA5E9",
+      backgroundColor: "#0EA5E922",
+      borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 5,
+      tension: .3, spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fm(c.parsed.y) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Toneladas" }, ...ejeCompacto } }
+    }
+  });
+  const cont = document.getElementById("ctrlDetVolumen");
+  const claves = ["Estados Unidos","Brasil","Chile"];
+  const pintar = () => {
+    [...cont.querySelectorAll('button')].forEach((b) => b.classList.toggle('on', b.dataset.op === activa));
+  };
+  D.opciones.forEach((op) => {
+    const b = document.createElement('button');
+    b.textContent = op; b.dataset.op = op;
+    b.addEventListener('click', () => {
+      activa = op;
+      ch.data.datasets.forEach((d, i) => { d.data = D.series[activa][claves[i]]; });
+      ch.update();
+      pintar();
+    });
+    cont.appendChild(b);
+  });
+  pintar();
+  })();
+(() => { const D = DATOS.chDetPrecio;
+  let activa = D.opciones[0];
+  const fm = (v) => '$' + fmt(v, 2);
+  const ch = new Chart(document.getElementById("chDetPrecio"), {
+    type: 'line',
+    data: { labels: D.labels, datasets: [{
+      label: "Estados Unidos",
+      data: D.series[activa]["Estados Unidos"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 5,
+      tension: .3, spanGaps: true
+    },{
+      label: "Brasil",
+      data: D.series[activa]["Brasil"],
+      borderColor: "#2e8b57",
+      backgroundColor: "#2e8b5722",
+      borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 5,
+      tension: .3, spanGaps: true
+    },{
+      label: "Chile",
+      data: D.series[activa]["Chile"],
+      borderColor: "#0EA5E9",
+      backgroundColor: "#0EA5E922",
+      borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 5,
+      tension: .3, spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fm(c.parsed.y) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "USD por kilogramo" }, ...{ ticks: { callback: (v) => '$' + fmt(v, 2) } } } }
+    }
+  });
+  const cont = document.getElementById("ctrlDetPrecio");
+  const claves = ["Estados Unidos","Brasil","Chile"];
+  const pintar = () => {
+    [...cont.querySelectorAll('button')].forEach((b) => b.classList.toggle('on', b.dataset.op === activa));
+  };
+  D.opciones.forEach((op) => {
+    const b = document.createElement('button');
+    b.textContent = op; b.dataset.op = op;
+    b.addEventListener('click', () => {
+      activa = op;
+      ch.data.datasets.forEach((d, i) => { d.data = D.series[activa][claves[i]]; });
+      ch.update();
+      pintar();
+    });
+    cont.appendChild(b);
+  });
+  pintar();
+  })();
+(() => { const D = DATOS.chPolloHuevo;
+  new Chart(document.getElementById("chPolloHuevo"), {
+    type: 'line',
+    data: { labels: D["labels"], datasets: [{
+      label: "Pollo vivo en andén",
+      data: D["pollo"],
+      borderColor: "#03488D",
+      backgroundColor: "#03488D22",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    },{
+      label: "Huevo blanco al productor",
+      data: D["huevo"],
+      borderColor: "#b85c00",
+      backgroundColor: "#b85c0022",
+      borderWidth: 2.4,
+      borderDash: [],
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: .3,
+      fill: false,
+      spanGaps: true
+    }] },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + '$' + fmt(c.parsed.y, 2) } } },
+      scales: { x: { grid: { display: false } },
+        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Pesos por kilogramo" }, ...(ejeMoneda) } }
+    }
+  }); })();
+(() => { const D = DATOS.chFocosMes;
+  new Chart(document.getElementById("chFocosMes"), {
+    type: 'bar',
+    data: { labels: D["labels"], datasets: [{
+      label: "United States of America",
+      data: D["United States of America"],
+      backgroundColor: "#03488D",
+      borderRadius: 4,
+      borderSkipped: false
+    },{
+      label: "Canada",
+      data: D["Canada"],
+      backgroundColor: "#F8D227",
+      borderRadius: 4,
+      borderSkipped: false
+    },{
+      label: "Peru",
+      data: D["Peru"],
+      backgroundColor: "#0EA5E9",
+      borderRadius: 4,
+      borderSkipped: false
+    },{
+      label: "Chile",
+      data: D["Chile"],
+      backgroundColor: "#2e8b57",
+      borderRadius: 4,
+      borderSkipped: false
+    },{
+      label: "Mexico",
+      data: D["Mexico"],
+      backgroundColor: "#C8A84B",
+      borderRadius: 4,
+      borderSkipped: false
+    },{
+      label: "Otros países",
+      data: D["otros"],
+      backgroundColor: "#9AA5B1",
+      borderRadius: 4,
+      borderSkipped: false
+    }] },
+    plugins: [],
+    options: {
+      indexAxis: "x",
+      layout: { padding: { right: 0 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: true, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.y) } } },
+      scales: {
+        x: { stacked: true, grid: { display: false }, title: { display: false, text: "Focos notificados" }, ...({}) },
+        y: { stacked: true, grid: { color: 'rgba(6,37,75,.07)' }, title: { display: true, text: "Focos notificados" }, ...(ejeCompacto) }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chTipoUnidad;
+  new Chart(document.getElementById("chTipoUnidad"), {
+    type: 'bar',
+    data: { labels: D["labels"], datasets: [{
+      label: "Focos",
+      data: D["focos"],
+      backgroundColor: "#03488D",
+      borderRadius: 4,
+      borderSkipped: false
+    }] },
+    plugins: [{ afterDatasetsDraw(ch) {
+        const ctx = ch.ctx; ctx.save();
+        ctx.font = '600 10px Poppins, system-ui, sans-serif';
+        ctx.fillStyle = '#5a6478'; ctx.textBaseline = 'middle';
+        const f = (v) => fmtC(v);
+        ch.data.datasets.forEach((ds, di) => {
+          const meta = ch.getDatasetMeta(di);
+          if (meta.hidden) return;
+          meta.data.forEach((el, i) => {
+            const v = ds.data[i];
+            if (v === null || v === undefined) return;
+            ctx.fillText(f(v), el.x + 6, el.y);
+          });
+        });
+        ctx.restore();
+      } }],
+    options: {
+      indexAxis: "y",
+      layout: { padding: { right: 54 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.x) } } },
+      scales: {
+        x: { stacked: false, grid: { display: true }, title: { display: true, text: "Focos notificados" }, ...(ejeCompacto) },
+        y: { stacked: false, grid: { color: 'rgba(6,37,75,.07)' }, title: { display: false, text: "Focos notificados" }, ticks: { font: { size: 10 }, autoSkip: false, callback: function(v) {
+        const t = this.getLabelForValue(v);
+        if (t.length <= 15) return t;
+        const palabras = t.split(' '); const lineas = [''];
+        for (const p of palabras) {
+          const i = lineas.length - 1;
+          if ((lineas[i] + ' ' + p).trim().length <= 15) lineas[i] = (lineas[i] + ' ' + p).trim();
+          else lineas.push(p);
+        }
+        return lineas;
+      } }, ...({}) }
+      }
+    }
+  }); })();
+(() => { const D = DATOS.chAvesTipo;
+  new Chart(document.getElementById("chAvesTipo"), {
+    type: 'bar',
+    data: { labels: D["labels"], datasets: [{
+      label: "Aves perdidas",
+      data: D["aves"],
+      backgroundColor: "#EF4444",
+      borderRadius: 4,
+      borderSkipped: false
+    }] },
+    plugins: [{ afterDatasetsDraw(ch) {
+        const ctx = ch.ctx; ctx.save();
+        ctx.font = '600 10px Poppins, system-ui, sans-serif';
+        ctx.fillStyle = '#5a6478'; ctx.textBaseline = 'middle';
+        const f = (v) => fmtC(v);
+        ch.data.datasets.forEach((ds, di) => {
+          const meta = ch.getDatasetMeta(di);
+          if (meta.hidden) return;
+          meta.data.forEach((el, i) => {
+            const v = ds.data[i];
+            if (v === null || v === undefined) return;
+            ctx.fillText(f(v), el.x + 6, el.y);
+          });
+        });
+        ctx.restore();
+      } }],
+    options: {
+      indexAxis: "y",
+      layout: { padding: { right: 54 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false, position: 'bottom' },
+        tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.x) } } },
+      scales: {
+        x: { stacked: false, grid: { display: true }, title: { display: true, text: "Aves perdidas" }, ...(ejeCompacto) },
+        y: { stacked: false, grid: { color: 'rgba(6,37,75,.07)' }, title: { display: false, text: "Aves perdidas" }, ticks: { font: { size: 10 }, autoSkip: false, callback: function(v) {
+        const t = this.getLabelForValue(v);
+        if (t.length <= 15) return t;
+        const palabras = t.split(' '); const lineas = [''];
+        for (const p of palabras) {
+          const i = lineas.length - 1;
+          if ((lineas[i] + ' ' + p).trim().length <= 15) lineas[i] = (lineas[i] + ' ' + p).trim();
+          else lineas.push(p);
+        }
+        return lineas;
+      } }, ...({}) }
+      }
+    }
+  }); })();
+</script>
+</body>
+</html>
