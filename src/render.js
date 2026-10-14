@@ -6,18 +6,11 @@
 import * as C from './charts.js';
 import * as H from './html.js';
 import * as M from './metrics.js';
-import { UNA } from '../config.js';
+import { PALETA_V3 } from '../config.js';
 
-// El backend nombra los colores de forma semantica para no imponer una paleta.
-const PALETA = {
-  navy: UNA.navyPrimary,
-  gold: UNA.accentYellow,
-  cyan: UNA.cyan,
-  green: UNA.green,
-  red: UNA.red,
-  amber: UNA.amber,
-  gris: '#9AA5B1',
-};
+// El backend nombra los colores de forma semantica para no imponer una paleta;
+// aqui se traducen a la paleta de series del Design System v3.
+const PALETA = PALETA_V3;
 const color = (nombre) => (nombre ? PALETA[nombre] ?? nombre : undefined);
 
 // El modelo marca el enfasis con **dobles asteriscos**: se convierte a HTML
@@ -161,12 +154,10 @@ export function renderizar(modelo) {
   const nav = [{ id: 'resumen', label: 'Resumen' }];
   const bloques = [];
 
-  bloques.push(`<section id="resumen">
-  <div class="kpis">${kpisPrincipales.map(tarjetaKpi).join('')}</div>
-  ${modelo.lectura ? `<div class="lectura">${enfasis(modelo.lectura)}</div>` : ''}
-</section>`);
+  // Paginas: 00 portada con resumen, 01..N secciones y la nota metodologica al final.
+  const ultimaPagina = modelo.secciones.length + 1;
 
-  for (const sec of modelo.secciones) {
+  for (const [i, sec] of modelo.secciones.entries()) {
     nav.push({ id: sec.id, label: sec.navLabel ?? sec.titulo });
 
     const elementos = [];
@@ -181,31 +172,58 @@ export function renderizar(modelo) {
 
     const kpisSeccion = modelo.kpis.filter((k) => k.seccion === sec.id);
 
-    bloques.push(`<section id="${H.esc(sec.id)}">
-  ${H.banda(sec.titulo, sec.numero)}
+    bloques.push(`<section class="page" id="${H.esc(sec.id)}"><div class="page-in">
+  ${H.banda(sec.titulo, sec.numero, { actual: i + 1, total: ultimaPagina })}
   ${kpisSeccion.length ? `<div class="kpis">${kpisSeccion.map(tarjetaKpi).join('')}</div>` : ''}
   ${maquetar(elementos)}
   ${(sec.lecturas ?? []).map((l) => `<div class="lectura">${enfasis(l)}</div>`).join('')}
   ${(sec.avisos ?? []).map((a) => `<div class="aviso"><strong>${H.esc(a.titulo)}.</strong> ${H.esc(a.texto)}</div>`).join('')}
-</section>`);
+</div></section>`);
   }
 
   nav.push({ id: 'nota', label: 'Nota metodológica' });
 
+  const generado = new Date();
   const metodologia = `
-<div class="metodo" id="nota">
-  <h3>Nota metodológica y alcance</h3>
+<div class="metodo">
+  <span class="eyebrow on-dark">${String(ultimaPagina).padStart(2, '0')} · Anexo</span>
+  <h3>Nota metodológica y <em>alcance</em></h3>
   <p><span class="badge-r">Origen de los datos</span>&nbsp; Todas las cifras provienen de la base de datos institucional y se consultan en el momento de generar el reporte. Los indicadores derivados —promedios y sumas móviles, variación interanual, correlaciones y conversiones de unidad— se calculan en el servidor, de modo que cualquier sistema que consuma el mismo servicio obtiene exactamente estas cifras.</p>
   <p><span class="badge-r">Ventanas móviles</span>&nbsp; Las ventanas de 12 meses se alinean al último dato disponible, no al año calendario, para que los cortes de calendario no se lean como tendencia.</p>
   <p><span class="badge-r">Comercio exterior</span>&nbsp; Las cifras salen de los pedimentos aduanales. Se omite el precio implícito de los meses con volumen marginal, donde los costos fijos del embarque distorsionan el valor por kilogramo.</p>
   <p><span class="badge-r">Revisiones</span>&nbsp; Las cifras más recientes pueden ser preliminares y ajustarse en cargas posteriores.</p>
-  <p><span class="badge-r">Generado</span>&nbsp; ${new Date().toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</p>
+  <p><span class="badge-r">Generado</span>&nbsp; ${generado.toLocaleString('es-MX', { dateStyle: 'long', timeStyle: 'short' })}</p>
 </div>`;
+
+  // El producto (lo que va antes de los dos puntos en el encabezado) se marca
+  // como la palabra en italica que lleva todo titulo grande del sistema.
+  const lineas = modelo.meta.encabezadoLineas ?? [modelo.meta.encabezado ?? ''];
+  const producto = lineas[0].includes(':') ? lineas[0].split(':')[0].trim() : null;
+  const h1 = lineas
+    .map(H.esc)
+    .map((l, i) => (i === 0 && producto ? l.replace(/^([^:]+):/, '<em>$1</em>:') : l))
+    .join('<br>');
+  const datosA = modelo.meta.datosA ?? 'la última carga disponible';
 
   return {
     titulo: modelo.meta.titulo,
-    h1: (modelo.meta.encabezadoLineas ?? [modelo.meta.encabezado ?? '']).map(H.esc).join('<br>'),
-    subtitulo: `Unión Nacional de Avicultores · Datos a ${modelo.meta.datosA ?? 'la última carga disponible'}`,
+    h1,
+    subtitulo: `Unión Nacional de Avicultores · Datos a ${datosA}`,
+    resumen: {
+      kpis: kpisPrincipales.map(tarjetaKpi).join(''),
+      lectura: modelo.lectura ? enfasis(modelo.lectura) : '',
+    },
+    portada: {
+      corto: producto ? `Reporte de ${producto}` : modelo.meta.titulo,
+      producto: producto ? producto.toLowerCase() : null,
+      eyebrow: 'Reporte analítico',
+      datosA,
+      meta: [
+        { label: 'Datos a', valor: datosA },
+        { label: 'Páginas', valor: String(ultimaPagina + 1).padStart(2, '0') },
+        { label: 'Generado', valor: generado.toLocaleDateString('es-MX', { dateStyle: 'medium' }) },
+      ],
+    },
     nav,
     secciones: bloques.join('\n'),
     datos: DATOS,

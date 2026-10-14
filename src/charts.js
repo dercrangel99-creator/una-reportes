@@ -1,12 +1,15 @@
 // Generadores de codigo Chart.js. Cada funcion devuelve el string JS que
 // inicializa un grafico leyendo su serie desde el objeto DATOS embebido.
 
-import { SERIE_COLORS, UNA } from '../config.js';
+import { SERIE_V3, V3, HEAT_V3 } from '../config.js';
 
-const color = (i) => SERIE_COLORS[i % SERIE_COLORS.length];
+const color = (i) => SERIE_V3[i % SERIE_V3.length];
 const j = (v) => JSON.stringify(v);
 
-const GRID = `{ color: 'rgba(6,37,75,.07)' }`;
+// Rejilla recesiva del sistema (§2.3): #E2E8F0, punteada desde Chart.defaults.
+const GRID = `{ color: '${V3.panelBorder}' }`;
+// Valores escritos sobre el canvas: cifras en mono y tinta de texto, no de serie.
+const FUENTE_VALOR = `'500 10px "JetBrains Mono", ui-monospace, monospace'`;
 
 // Linea simple o multiple. series: [{key,label,color?,dash?,relleno?}]
 export function linea({ id, datosKey, labelsKey = 'labels', series, eje = '', moneda = false, compacto = false }) {
@@ -17,7 +20,7 @@ export function linea({ id, datosKey, labelsKey = 'labels', series, eje = '', mo
       data: D[${j(s.key)}],
       borderColor: ${j(s.color || color(i))},
       backgroundColor: ${j((s.color || color(i)) + '22')},
-      borderWidth: ${s.ancho || 2.4},
+      borderWidth: ${s.ancho || 2.25},
       borderDash: ${j(s.dash || [])},
       pointRadius: ${s.puntos === false ? 0 : 0},
       pointHoverRadius: 4,
@@ -51,8 +54,8 @@ export function barras({ id, datosKey, labelsKey = 'labels', series, eje = '', m
       label: ${j(s.label)},
       data: D[${j(s.key)}],
       backgroundColor: ${j(s.color || color(i))},
-      borderRadius: 4,
-      borderSkipped: false
+      borderRadius: ${apilado ? 0 : 3},
+      borderSkipped: 'start'
     }`
     )
     .join(',');
@@ -93,8 +96,8 @@ export function barras({ id, datosKey, labelsKey = 'labels', series, eje = '', m
   const pluginEtiquetas = horizontal && etiquetas
     ? `[{ afterDatasetsDraw(ch) {
         const ctx = ch.ctx; ctx.save();
-        ctx.font = '600 10px Poppins, system-ui, sans-serif';
-        ctx.fillStyle = '${UNA.textMuted}'; ctx.textBaseline = 'middle';
+        ctx.font = ${FUENTE_VALOR};
+        ctx.fillStyle = '${V3.textMuted}'; ctx.textBaseline = 'middle';
         const f = ${formatoValor};
         ch.data.datasets.forEach((ds, di) => {
           const meta = ch.getDatasetMeta(di);
@@ -137,12 +140,12 @@ export function combo({ id, datosKey, labelsKey = 'labels', barras: b, lineas: l
   // se dibuja igual, con una escala 0-1 que no significa nada.
   const usaEjeDer = l.some((s) => !s.ejeIzq);
   const dsB = b
-    .map((s, i) => `{ type: 'bar', label: ${j(s.label)}, data: D[${j(s.key)}], backgroundColor: ${j(s.color || color(i))}, borderRadius: 4, yAxisID: 'y', order: 5 }`)
+    .map((s, i) => `{ type: 'bar', label: ${j(s.label)}, data: D[${j(s.key)}], backgroundColor: ${j(s.color || color(i))}, borderRadius: 3, borderSkipped: 'start', yAxisID: 'y', order: 5 }`)
     .join(',');
   const dsL = l
     .map(
       (s, i) =>
-        `{ type: 'line', label: ${j(s.label)}, data: D[${j(s.key)}], borderColor: ${j(s.color || color(i + b.length))}, backgroundColor: ${j(s.color || color(i + b.length))}, borderWidth: 3.2, borderDash: ${j(s.dash || [])}, pointRadius: 0, pointHoverRadius: 5, tension: .3, spanGaps: true, yAxisID: ${j(s.ejeIzq ? 'y' : 'y1')}, order: ${i + 1}, borderJoinStyle: 'round', borderCapStyle: 'round' }`
+        `{ type: 'line', label: ${j(s.label)}, data: D[${j(s.key)}], borderColor: ${j(s.color || color(i + b.length))}, backgroundColor: ${j(s.color || color(i + b.length))}, borderWidth: 2.5, borderDash: ${j(s.dash || [])}, pointRadius: 0, pointHoverRadius: 5, tension: .3, spanGaps: true, yAxisID: ${j(s.ejeIzq ? 'y' : 'y1')}, order: ${i + 1}, borderJoinStyle: 'round', borderCapStyle: 'round' }`
     )
     .join(',');
   return `(() => { const D = DATOS.${datosKey};
@@ -168,7 +171,7 @@ export function dispersion({ id, datosKey, label, ejeX = '', ejeY = '' }) {
   return `(() => { const D = DATOS.${datosKey};
   new Chart(document.getElementById(${j(id)}), {
     type: 'scatter',
-    data: { datasets: [{ label: ${j(label)}, data: D.puntos, backgroundColor: ${j(UNA.navyPrimary)}, pointRadius: 4.5, pointHoverRadius: 6 }] },
+    data: { datasets: [{ label: ${j(label)}, data: D.puntos, backgroundColor: ${j(SERIE_V3[0])}, pointRadius: 4.5, pointHoverRadius: 6 }] },
     options: {
       plugins: { legend: { display: false },
         tooltip: { callbacks: { label: (c) => c.raw.t + ': (' + fmt(c.parsed.x,1) + ', ' + fmt(c.parsed.y,1) + ')' } } },
@@ -183,7 +186,7 @@ export function dona({ id, datosKey, moneda = false }) {
   return `(() => { const D = DATOS.${datosKey};
   new Chart(document.getElementById(${j(id)}), {
     type: 'doughnut',
-    data: { labels: D.labels, datasets: [{ data: D.valores, backgroundColor: ${j(SERIE_COLORS)}, borderWidth: 2, borderColor: '#fff' }] },
+    data: { labels: D.labels, datasets: [{ data: D.valores, backgroundColor: ${j(SERIE_V3)}, borderWidth: 2, borderColor: '#fff' }] },
     options: { cutout: '58%', plugins: { legend: { position: 'right' },
       tooltip: { callbacks: { label: (c) => c.label + ': ' + fmtC(c.parsed) + ' (' + (c.parsed / c.dataset.data.reduce((a,b)=>a+b,0) * 100).toFixed(1) + '%)' } } } }
   }); })();`;
@@ -209,7 +212,7 @@ export function lineaFiltrada({ id, ctrlId, datosKey, series, eje = '', moneda =
       data: D.series[activa][${j(s.key)}],
       borderColor: ${j(s.color || color(i))},
       backgroundColor: ${j((s.color || color(i)) + '22')},
-      borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 5,
+      borderWidth: 2.25, pointRadius: 0, pointHoverRadius: 5,
       tension: .3, spanGaps: true
     }`
     )
@@ -226,7 +229,7 @@ export function lineaFiltrada({ id, ctrlId, datosKey, series, eje = '', moneda =
       plugins: { legend: { position: 'bottom' },
         tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fm(c.parsed.y) } } },
       scales: { x: { grid: { display: false } },
-        y: { grid: { color: 'rgba(6,37,75,.07)' }, title: { display: ${!!eje}, text: ${j(eje)} }, ...${ejeValor} } }
+        y: { grid: ${GRID}, title: { display: ${!!eje}, text: ${j(eje)} }, ...${ejeValor} } }
     }
   });
   const cont = document.getElementById(${j(ctrlId)});
@@ -259,12 +262,12 @@ export function barrasFiltradas({ id, ctrlId, datosKey, label, eje = '', color: 
     type: 'bar',
     data: { labels: D.series[activa].labels, datasets: [{
       label: ${j(label)}, data: D.series[activa].valores,
-      backgroundColor: ${j(col || UNA.navyPrimary)}, borderRadius: 4, borderSkipped: false
+      backgroundColor: ${j(col || SERIE_V3[0])}, borderRadius: 3, borderSkipped: 'start'
     }] },
     plugins: [{ afterDatasetsDraw(ch2) {
       const ctx = ch2.ctx; ctx.save();
-      ctx.font = '600 10px Poppins, system-ui, sans-serif';
-      ctx.fillStyle = '${UNA.textMuted}'; ctx.textBaseline = 'middle';
+      ctx.font = ${FUENTE_VALOR};
+      ctx.fillStyle = '${V3.textMuted}'; ctx.textBaseline = 'middle';
       ch2.getDatasetMeta(0).data.forEach((el, i) => {
         const v = ch2.data.datasets[0].data[i];
         if (v === null || v === undefined) return;
@@ -279,7 +282,7 @@ export function barrasFiltradas({ id, ctrlId, datosKey, label, eje = '', color: 
         tooltip: { callbacks: { label: (c) => c.dataset.label + ': ' + fmtC(c.parsed.x) } } },
       scales: {
         x: { grid: { display: true }, title: { display: ${!!eje}, text: ${j(eje)} }, ...ejeCompacto },
-        y: { grid: { color: 'rgba(6,37,75,.07)' }, ticks: { font: { size: 10 }, autoSkip: false } }
+        y: { grid: ${GRID}, ticks: { font: { size: 10 }, autoSkip: false } }
       }
     }
   });
@@ -307,6 +310,14 @@ export function barrasFiltradas({ id, ctrlId, datosKey, label, eje = '', color: 
 // El sufijo va vacio por defecto: con 12 columnas en una tarjeta a media
 // pagina no cabe "+54.3%" sin recortarse. La unidad se indica en la
 // descripcion de la tarjeta, no en cada celda.
+// Contraste WCAG entre dos colores RGB (0-255).
+const luminancia = (rgb) => {
+  const [r, g, b] = rgb.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contraste = (a, b) => { const [x, y] = [luminancia(a), luminancia(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+
 export function heatmapHtml(matrizCompleta, { sufijo = '' } = {}) {
   const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
   // Se omiten los años sin ningun dato: una fila entera de "n/d" no aporta.
@@ -317,10 +328,15 @@ export function heatmapHtml(matrizCompleta, { sufijo = '' } = {}) {
   const celda = (v) => {
     if (v === null || v === undefined) return `<td class="heat-cell empty">n/d</td>`;
     const int = Math.min(Math.abs(v) / maxAbs, 1);
-    // Verde para variacion positiva, rojo para negativa (escala UNA).
-    const base = v >= 0 ? [46, 139, 87] : [239, 68, 68];
-    const bg = `rgba(${base[0]},${base[1]},${base[2]},${(0.12 + int * 0.75).toFixed(2)})`;
-    const fg = int > 0.55 ? '#fff' : UNA.textDark;
+    // Verde para variacion positiva, rojo para negativa (escala del sistema).
+    const base = v >= 0 ? HEAT_V3.sube : HEAT_V3.baja;
+    const alfa = 0.12 + int * 0.75;
+    const bg = `rgba(${base[0]},${base[1]},${base[2]},${alfa.toFixed(2)})`;
+    // El texto (blanco u oscuro) se elige por el mayor contraste contra el
+    // color que resulta de la celda sobre el panel blanco.
+    const fondo = base.map((c) => c * alfa + 255 * (1 - alfa));
+    const oscuro = hexRgb(HEAT_V3.texto);
+    const fg = contraste(fondo, [255, 255, 255]) > contraste(fondo, oscuro) ? '#fff' : HEAT_V3.texto;
     return `<td class="heat-cell" style="background:${bg};color:${fg}">${v >= 0 ? '+' : ''}${v.toFixed(1)}${sufijo}</td>`;
   };
   const filas = matriz

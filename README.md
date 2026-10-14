@@ -82,14 +82,14 @@ reportes es casi inmediato.
 ## Estructura
 
 ```
-config.js              Backend, puerto y paleta de marca UNA
+config.js              Backend, puerto y tokens del Design System v3
 generate.js            Generador por línea de comandos
 server.js              Interfaz con el botón de generación
 src/
   api.js               Cliente del endpoint de reportes
-  render.js            Convierte el modelo del backend en HTML
+  render.js            Convierte el modelo del backend en páginas HTML
   charts.js            Constructores de gráficos Chart.js y mapas de calor
-  html.js              Diseño: CSS, cabecera, tarjetas, secciones
+  html.js              Diseño: CSS, sidebar, portada, páginas, navegación
   metrics.js           Formato de cifras
 scripts/validar.mjs    Validador de los reportes generados
 out/                   Reportes generados
@@ -103,9 +103,32 @@ tablas).
 
 ## Diseño
 
-Replica el layout y la tipografía (Poppins) de los reportes HTML originales de
-la UNA, pero con la paleta de marca del frontend: azul marino `#06254B`,
-azul primario `#03488D` y amarillo `#F8D227`.
+Sigue el Design System v3 de la UNA (`DESIGN-una-v3.md`). Los valores viven
+como tokens en `config.js` (`V3`, `FUENTES`, `SERIE_V3`, `PALETA_V3`,
+`HEAT_V3`); el CSS y los gráficos los leen de ahí.
+
+- **Tipografía:** Playfair Display en títulos y valores de KPI (con una palabra
+  en itálica como acento), Inter en la interfaz y JetBrains Mono en cifras.
+- **Color:** la estructura (sidebar, portada, nota metodológica, cabecera de la
+  home) usa el estilo oscuro "CME" (`#0B1528`, rejilla de 50px, amarillo
+  `#FDC300` y cian `#0EA5E9` como acentos); el contenido de datos usa el claro
+  de dashboards (fondo `#F3F5F8`, paneles blancos con borde `#E2E8F0`).
+- **Reportes tipo presentación:** sidebar fijo con las páginas numeradas y un
+  área de contenido donde cada sección es una página. La página 00 es la
+  portada: resumen (KPIs y lectura) a la izquierda y cover a la derecha. La
+  nota metodológica es la última página. En pantallas de menos de 1024px el
+  sidebar se abre desde una barra superior.
+- **Navegación:** un script aparte (`<script data-nav>`) marca la página
+  visible en el sidebar y maneja el menú móvil. Va separado a propósito:
+  `scripts/validar.mjs` ejecuta solo el último `<script>` sin atributos, que es
+  el de los gráficos.
+- **Gráficos:** la paleta de series (`SERIE_V3`) respeta el orden de colores
+  que manda el backend (`navy`, `gold`, `cyan`, `green`…) y se validó para
+  daltonismo y visión normal; el gris queda reservado para "Otros". En el mapa
+  de calor el texto de cada celda se elige por contraste.
+- **Impresión:** el cover sale en la primera hoja, el resumen en la segunda y
+  cada sección empieza en hoja nueva; los gráficos se escalan al ancho de la
+  hoja.
 
 ## Brechas de datos conocidas
 
